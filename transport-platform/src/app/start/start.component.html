@@ -1,0 +1,70 @@
+<div class="Page1" style = "display: flex;">
+    <div style = "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50%">
+      <h1 class="title">Trasportation Platform</h1>
+      <img src="assets/Capture.JPG" class="logo" alt="logo">
+    </div>
+    <div style ="width: 20%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div>
+        <button (click)="showLogIn()" class="LoginButton">Log-in</button>
+      </div>
+      <div>
+        <button (click)="showSignUp()" class="SignUp">SignUp</button>
+      </div>
+    </div>
+    <div class="container" style = "width: 30%">
+      <form [formGroup]="loginForm" *ngIf="login">
+          <div class="row">
+              <div class="col-25">
+              <label for="fname">Email</label>
+              </div>
+              <div >
+              <input type="text" id="fname" name="email" placeholder="Your email.."  formControlName="email">
+              </div>
+          </div>
+          <div class="row">
+              <div >
+              <label for="lname">Password</label>
+              </div>
+              <div >
+              <input type="password" id="lname" name="password" placeholder="Password.." formControlName="password">
+              </div>
+          </div>
+          <div class="row">
+            <input type="submit" value="Login" (click)="LogIn()">
+          </div>
+      </form>
+      <form [formGroup]="signupForm" *ngIf = "signup">
+        <div class="row">
+            <div class="col-25">
+            <label for="fname">Email</label>
+            </div>
+            <div >
+            <input type="text" id="email" name="email" placeholder="Your email.." formControlName="email">
+            </div>
+        </div>
+        <div class="row">
+            <div >
+            <label for="lname">Password</label>
+            </div>
+            <div >
+            <input type="password" id="password" name="password" placeholder="Password.." formControlName="password">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-25">
+            <label for="type">User Type</label>
+            </div>
+            <div class="col-75">
+            <select id="type" name="type" formControlName="type">
+                <option value="transporter">Transporter</option>
+                <option value="client">Client</option>
+                <option value="admin">Admin</option>
+            </select>
+            </div>
+        </div>
+        <div class="row">
+            <input type="submit" value="SignUp" (click)="SignUp()">
+        </div>
+    </form>
+  </div>
+  </div>
