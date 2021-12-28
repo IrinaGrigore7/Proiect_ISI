@@ -35,6 +35,14 @@
       </form>
       <form [formGroup]="signupForm" *ngIf = "signup">
         <div class="row">
+          <div class="col-25">
+          <label for="fname">Username</label>
+          </div>
+          <div >
+          <input type="text" id="username" name="username" placeholder="Your username.." formControlName="username">
+          </div>
+      </div>
+        <div class="row">
             <div class="col-25">
             <label for="fname">Email</label>
             </div>
