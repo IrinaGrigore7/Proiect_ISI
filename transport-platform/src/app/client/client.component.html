@@ -1,1 +1,125 @@
-<p>client page</p>
+<div class="container" style = "display: flex;">
+    <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
+        <div>
+            <input type="button" value="Contractele mele">
+        </div>
+        <div>
+            <input (click)="addRequest()" type="button" value="   Adauga cerere ">
+        </div>
+        <div>
+            <input (click)="ShowTracks()" type="button" value="   Vezi camioane ">
+        </div>
+    </div>
+    <div class="list-group" *ngIf="showtracks" style = "display: flex; flex-direction: column;">
+        <div class="users" *ngFor="let track of tracks; index as i;">
+            <p>Data plecare: {{track.data_plecare}} 
+                <br> Data sosire: {{track.data_sosire}} 
+                <br>Loc plecare: {{track.loc_plecare}}
+                <br>Loc sosire: {{track.loc_sosire}}
+                <br>Tip camion: {{track.tip_camion}}
+                <br>Volum: {{track.volum}}
+                <br>Gabarit: {{track.gabarit}}
+                <br>Greutate: {{track.greutate}}
+                <br>Pret: {{track.pret}}
+                <br>Numar telefon: {{track.numar_tel}}
+                <br><button (click)="TakeTrack(i)">Rezerva camion</button>
+            </p>  
+        </div>
+      </div>
+    <div>
+        <form [formGroup]="addRequestForm" *ngIf="add">
+            <div class="row">
+                <div class="col-25">
+                <label for="dplecare">Data plecare</label>
+                </div>
+                <div >
+                <input type="date" id="dplecare" placeholder="Data plecare..."  formControlName="data_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lplecare">Loc plecare</label>
+                </div>
+                <div >
+                <input type="text" id="lplecare"  placeholder="Loc plecare.." formControlName="loc_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="dmaxplecare">Data maxima plecare</label>
+                </div>
+                <div >
+                <input type="date" id="dmaxplecare" placeholder="Data maximaplecare..."  formControlName="data_max_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="dsosire">Data sosire</label>
+                </div>
+                <div >
+                <input type="date" id="dsosore" placeholder="Data sosire..."  formControlName="data_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lsosire">Loc sosire</label>
+                </div>
+                <div >
+                <input type="text" id="lsosire"  placeholder="Loc sosire.." formControlName="loc_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="dmaxsosire">Data maxima sosire</label>
+                </div>
+                <div >
+                <input type="date" id="dmaxsosore" placeholder="Data maxima sosire..."  formControlName="data_max_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="tipmarfa">Tip marfa</label>
+                </div>
+                <div >
+                <input type="text" id="tipmarfa"  placeholder="Tip marfa.." formControlName="tip_marfa">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="masa">Masa</label>
+                </div>
+                <div >
+                <input type="number" id="masa"  placeholder="Masa.." formControlName="masa">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="volum">Volum</label>
+                </div>
+                <div >
+                <input type="number" id="volum"  placeholder="Volum.." formControlName="volum">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="buget">Buget</label>
+                </div>
+                <div >
+                <input type="number" id="buget"  placeholder="Buget.." formControlName="buget">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="numar_tel">Date de contact (numar de telefon)</label>
+                </div>
+                <div >
+                <input type="text" id="numar_tel"  placeholder="Numar telefon.." formControlName="numar_tel">
+                </div>
+            </div>
+            <div class="row">
+              <input type="submit" value="Adauga cerere" (click)="SubmitRequest()">
+            </div>
+        </form>
+    </div>
+
+</div>

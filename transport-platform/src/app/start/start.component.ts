@@ -6,6 +6,8 @@ import { Validators } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
+import { LocalStorageService } from '../services/local-storage.service';
+
 
 
 @Component({
@@ -17,13 +19,16 @@ import { Observable } from 'rxjs';
 export class StartComponent implements OnInit {
   login: boolean = false;
   signup: boolean = false;
+  id_user: any;
+
 
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
     private fb: FormBuilder,
     private _snackBar:  MatSnackBar,
-    private fs: AngularFirestore
+    private fs: AngularFirestore,
+    private localStorage: LocalStorageService
     ) {}
 
   loginForm = this.fb.group({
@@ -56,8 +61,9 @@ export class StartComponent implements OnInit {
     .then(value => {
       this.afAuth.currentUser.then(value => {
         const uid = value?.uid
-        console.log(uid)
+        this.id_user = value?.uid
         const jlogin = this.fs.collection('users').doc(uid)
+        this.localStorage.setItem('UserID', this.id_user);
         jlogin.ref.get().then((doc) => {
           const data: ITestItem = doc.data() as ITestItem
           if (data.type === 'client')
@@ -88,6 +94,7 @@ export class StartComponent implements OnInit {
       };
       this.afAuth.currentUser.then(value => {
         const uid = value?.uid
+        this.localStorage.setItem('UserID', this.id_user);
         this.fs.collection('users').doc(uid).set(item);
       })
       if (this.signupForm.value.type === 'transporter') {  
@@ -107,6 +114,8 @@ export class StartComponent implements OnInit {
       console.log('Something went wrong: ', err.message);
     });
   }
+
+  
   ngOnInit(): void {
   }
 }

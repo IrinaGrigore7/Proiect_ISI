@@ -1,1 +1,42 @@
-<p>admin page</p>
+<div class="container" style = "display: flex;">
+    <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
+        <div>
+            <input (click)="ShowUsers()" type="button" value="Utilizatori">
+        </div>
+        <div>
+            <input type="button" value="Contracte">
+        </div>
+        <div>
+            <input (click)="ShowProducts()" type="button" value="Marfa">
+        </div>
+    </div>
+    <div style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
+        <div class="list-group" *ngIf="showusers" >
+            <div class="users" *ngFor="let user of users">
+                <p>Username: {{user.username}} </p>
+                <p>Email: {{user.email}}</p>   
+                <p>Tip utilizator: {{user.type}}</p> 
+                <br>  
+            </div>
+          </div>
+        <form [formGroup]="addProductForm" *ngIf="showproducts">
+            <p>
+                Produse:
+            </p>
+            <div class="products" *ngFor="let product of products">
+                <p>{{product.name}}</p> 
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="fname">Adauga produs</label>
+                </div>
+                <div >
+                <input type="text" id="fname" name="name" placeholder="Produs.."  formControlName="name">
+                </div>
+            </div>
+            <div class="row">
+              <input type="submit" value="Adauga" (click)="AddProducts()">
+            </div>
+        </form>
+        </div>
+</div>

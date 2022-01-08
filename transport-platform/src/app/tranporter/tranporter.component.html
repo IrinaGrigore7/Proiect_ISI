@@ -1,14 +1,118 @@
 <div class="container" style = "display: flex;">
     <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
         <div>
-            <input type="button" value="Camioanele mele">
-        </div>
-        <div>
-            <input type="button" value="    Ofertele mele  ">
+            <input (click)="ShowRequests()" type="button" value="     Vezi cereri     ">
         </div>
         <div>
             <input type="button" value="Contractele mele">
         </div>
+        <div>
+            <input (click)="addTrack()" type="button" value="   Adauga camion">
+        </div>
+    </div>
+    <div class="list-group" *ngIf="showreq" style = "display: flex; flex-direction: column;">
+        <div class="users" *ngFor="let request of requests; index as i;">
+            <p>Data plecare: {{request.data_plecare}}
+                <br> data maxima plecare: {{request.data_max_plecare}}  
+                <br> Data sosire: {{request.data_sosire}} 
+                <br> Data maxima sosire: {{request.data_max_sosire}} 
+                <br>Loc plecare: {{request.loc_plecare}}
+                <br>Loc sosire: {{request.loc_sosire}}
+                <br>Tip marfa: {{request.tip_marfa}}
+                <br>Masa: {{request.masa}}
+                <br>Volum: {{request.volum}}
+                <br>Buget: {{request.buget}}
+                <br>Numar telefon: {{request.numar_tel}}
+                <br><button (click)="TakeProducts(i)">Preia marfa</button>
+            </p>  
+        </div>
+      </div>
+    <div style = "width: 70%">
+        <form [formGroup]="addTrackForm" *ngIf="add">
+            <div class="row">
+                <div class="col-25">
+                <label for="dplecare">Data plecare</label>
+                </div>
+                <div >
+                <input type="date" id="dplecare" placeholder="Data plecare..."  formControlName="data_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lplecare">Loc plecare</label>
+                </div>
+                <div >
+                <input type="text" id="lplecare"  placeholder="Loc plecare.." formControlName="loc_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="dsosire">Data sosire</label>
+                </div>
+                <div >
+                <input type="date" id="dsosore" placeholder="Data sosire..."  formControlName="data_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lsosire">Loc sosire</label>
+                </div>
+                <div >
+                <input type="text" id="lsosire"  placeholder="Loc sosire.." formControlName="loc_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="tipcamion">Tip camion</label>
+                </div>
+                <div >
+                <input type="text" id="tipcamion"  placeholder="Tip camion.." formControlName="tip_camion">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="volum">Volum</label>
+                </div>
+                <div >
+                <input type="number" id="volum"  placeholder="Volum.." formControlName="volum">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="gabarit">Gabarit</label>
+                </div>
+                <div >
+                <input type="number" id="gabarit"  placeholder="Gabarit.." formControlName="gabarit">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="greutate">Greutate</label>
+                </div>
+                <div >
+                <input type="number" id="greutate"  placeholder="Greutate.." formControlName="greutate">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="pret">Pret</label>
+                </div>
+                <div >
+                <input type="number" id="pret"  placeholder="Pret.." formControlName="pret">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="numar_tel">Date de contact (numar de telefon)</label>
+                </div>
+                <div >
+                <input type="text" id="numar_tel"  placeholder="Numar telefon.." formControlName="numar_tel">
+                </div>
+            </div>
+            <div class="row">
+              <input type="submit" value="Adauga camion" (click)="SubmitTrack()">
+            </div>
+        </form>
     </div>
 
 </div>
