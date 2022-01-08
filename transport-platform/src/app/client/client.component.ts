@@ -46,7 +46,6 @@ export class ClientComponent implements OnInit {
   });
 
   addRequest() {
-    console.log("hdhdhhdhdhhd")
     this.add = true;
     this.showtracks = false
   }
