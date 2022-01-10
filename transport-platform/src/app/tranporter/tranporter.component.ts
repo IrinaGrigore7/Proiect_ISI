@@ -58,7 +58,7 @@ export class TranporterComponent implements OnInit {
   }
 
   TakeProducts(i: number) {
-    // this.fs.collection('requests').doc(this.idList[i]).delete()
+    this.fs.collection('requests').doc(this.idList[i]).delete()
     this.requests.splice(i, 1)
     this.idList.splice(i, 1)
   }
