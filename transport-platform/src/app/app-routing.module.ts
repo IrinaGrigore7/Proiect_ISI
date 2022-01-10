@@ -6,13 +6,14 @@ import { StartComponent } from './start/start.component';
 import { TranporterComponent } from './tranporter/tranporter.component';
 import { ClientComponent } from './client/client.component';
 import { AdminComponent } from './admin/admin.component';
+import { map } from 'esri/widgets/TableList/TableListViewModel';
 
 const routes: Routes = [ 
     {path: 'start', component: StartComponent},
     {path: 'profile', component: ProfileComponent},
     {path: 'transporter', component: TranporterComponent},
     {path: 'client', component: ClientComponent},
-    {path: 'admin', component: AdminComponent}
+    {path: 'admin', component: AdminComponent},
 
 ]
 

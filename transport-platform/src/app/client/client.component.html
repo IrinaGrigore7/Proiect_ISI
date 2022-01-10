@@ -1,4 +1,4 @@
-<div class="container" style = "display: flex;">
+<div *ngIf = "showmap == false" class="container" style = "display: flex;">
     <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
         <div>
             <input type="button" value="Contractele mele">
@@ -9,6 +9,10 @@
         <div>
             <input (click)="ShowTracks()" type="button" value="   Vezi camioane ">
         </div>
+        <div>
+            <input (click)="initializeMap()" type="button" value="       Vezi harta     ">
+        </div>
+        
     </div>
     <div class="list-group" *ngIf="showtracks" style = "display: flex; flex-direction: column;">
         <div class="users" *ngFor="let track of tracks; index as i;">
@@ -122,4 +126,7 @@
         </form>
     </div>
 
+</div>
+<div style="height: 100%;">
+    <div #mapViewNode class="arcgis-div"></div>
 </div>

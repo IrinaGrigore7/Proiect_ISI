@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { LocalStorageService } from '../services/local-storage.service';
+import { setDefaultOptions, loadModules } from 'esri-loader';
 
 @Component({
   selector: 'app-client',
@@ -11,7 +12,25 @@ import { LocalStorageService } from '../services/local-storage.service';
 })
 export class ClientComponent implements OnInit {
   tracks: Array<TrackItem> = []
+  showmap: boolean = false
   idList: Array<string> = []
+  map: __esri.Map;
+  @ViewChild("mapViewNode", { static: true }) private mapViewEl: ElementRef;
+  view: __esri.MapView;
+  timeoutHandler = null;
+  pointGraphic: __esri.Graphic;
+  graphicsLayer: __esri.GraphicsLayer;
+  
+
+  _Map;
+  _MapView;
+  _FeatureLayer;
+  _Graphic;
+  _GraphicsLayer;
+  _route;
+  _RouteParameters;
+  _FeatureSet;
+  _config;
   constructor(
     private fb: FormBuilder,
     private fs: AngularFirestore,
@@ -80,6 +99,106 @@ export class ClientComponent implements OnInit {
     this.showtracks = true;
     this.add = false
   }
+  async initializeMap() {
+    try {
+      this.showmap = true
+
+        // before loading the modules for the first time,
+        // also lazy load the CSS for the version of
+        // the script that you're loading from the CDN
+        setDefaultOptions({ css: true });
+        
+
+        // Load the modules for the ArcGIS API for JavaScript
+        const [Map, MapView, FeatureLayer, Graphic, GraphicsLayer, route, RouteParameters, FeatureSet, esriConfig] = await loadModules([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/Graphic",
+            "esri/layers/GraphicsLayer",
+            "esri/rest/route",
+            "esri/rest/support/RouteParameters",
+            "esri/rest/support/FeatureSet",
+            "esri/config"
+        ]);
+
+        this._Map = Map;
+        this._MapView = MapView;
+        this._FeatureLayer = FeatureLayer;
+        this._Graphic = Graphic;
+        this._GraphicsLayer = GraphicsLayer;
+        this._route = route;
+        this._RouteParameters = RouteParameters;
+        this._FeatureSet = FeatureSet;
+        this._config = esriConfig;
+        this._config.apiKey= "AAPK046a40935c1e45e49250a5e5cfdf11ff0ztE-myr__KUXRSs62A1kRuDsqtokNKRk7e8C8M_2QbosShHsRUwF_vHNHtrh4-z";
+
+        // Configure the Map
+        const mapProperties = {
+            basemap: "arcgis-navigation"
+        };
+
+        this.map = new Map(mapProperties);
+
+        this.addFeatureLayers();
+       
+        // Initialize the MapView
+        const mapViewProperties = {
+            container: this.mapViewEl.nativeElement,
+            center: [ 25.601198, 45.939663],
+            zoom: 6.5,
+            map: this.map
+        };
+
+        this.view = new MapView(mapViewProperties);
+       
+      
+       
+        // Fires `pointer-move` event when user clicks on "Shift"
+        // key and moves the pointer on the view.
+        this.view.on('pointer-move', ["Shift"], (event) => {
+            let point = this.view.toMap({ x: event.x, y: event.y });
+            console.log("map moved: ", point.longitude, point.latitude);
+        });
+
+        await this.view.when(); // wait for map to load
+        console.log("ArcGIS map loaded");
+        return this.view;
+    } catch (error) {
+        console.error("EsriLoader: ", error);
+        throw error;
+    }
+}
+
+addFeatureLayers() {
+    // Trailheads feature layer (points)
+    var trailheadsLayer: __esri.FeatureLayer = new this._FeatureLayer({
+        url:
+            "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0"
+    });
+
+    this.map.add(trailheadsLayer);
+
+
+    // Trails feature layer (lines)
+    var trailsLayer: __esri.FeatureLayer = new this._FeatureLayer({
+        url:
+            "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails/FeatureServer/0"
+    });
+
+    this.map.add(trailsLayer, 0);
+
+    // Parks and open spaces (polygons)
+    var parksLayer: __esri.FeatureLayer = new this._FeatureLayer({
+        url:
+            "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0"
+    });
+
+    this.map.add(parksLayer, 0);
+
+    console.log("feature layers added");
+}
+
 }
 
 export interface ReqItem {
