@@ -13,6 +13,7 @@ import { setDefaultOptions, loadModules } from 'esri-loader';
 export class ClientComponent implements OnInit {
   tracks: Array<TrackItem> = []
   showmap: boolean = false
+  routeCoordinates: Array<any> = []
   idList: Array<string> = []
   map: __esri.Map;
   @ViewChild("mapViewNode", { static: true }) private mapViewEl: ElementRef;
@@ -20,7 +21,7 @@ export class ClientComponent implements OnInit {
   timeoutHandler = null;
   pointGraphic: __esri.Graphic;
   graphicsLayer: __esri.GraphicsLayer;
-  
+
 
   _Map;
   _MapView;
@@ -68,7 +69,7 @@ export class ClientComponent implements OnInit {
     this.add = true;
     this.showtracks = false
   }
-  
+
   TakeTrack(i: number) {
     this.fs.collection('tracks').doc(this.idList[i]).delete()
     this.tracks.splice(i, 1)
@@ -90,7 +91,7 @@ export class ClientComponent implements OnInit {
       buget: this.addRequestForm.value.buget,
       numar_tel: this.addRequestForm.value.numar_tel
     };
-    this.fs.collection('requests').add(item)  
+    this.fs.collection('requests').add(item)
     this.addRequestForm.reset()
     this.add = false;
   }
@@ -107,10 +108,10 @@ export class ClientComponent implements OnInit {
         // also lazy load the CSS for the version of
         // the script that you're loading from the CDN
         setDefaultOptions({ css: true });
-        
+
 
         // Load the modules for the ArcGIS API for JavaScript
-        const [Map, MapView, FeatureLayer, Graphic, GraphicsLayer, route, RouteParameters, FeatureSet, esriConfig] = await loadModules([
+        const [Map, MapView, FeatureLayer, Graphic, GraphicsLayer, route, RouteParameters, FeatureSet, esriConfig, PictureMarkerSymbol] = await loadModules([
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/FeatureLayer",
@@ -119,7 +120,8 @@ export class ClientComponent implements OnInit {
             "esri/rest/route",
             "esri/rest/support/RouteParameters",
             "esri/rest/support/FeatureSet",
-            "esri/config"
+            "esri/config",
+            "esri/symbols/PictureMarkerSymbol"
         ]);
 
         this._Map = Map;
@@ -141,8 +143,61 @@ export class ClientComponent implements OnInit {
         this.map = new Map(mapProperties);
 
         this.addFeatureLayers();
-       
-        // Initialize the MapView
+
+      const graphicsLayer = new GraphicsLayer();
+
+      const pointCenterBucharest = { //Create a point
+        type: "point",
+        longitude: 26.102866,
+        latitude: 44.428054,
+      };
+
+      const pointCenterClujNapoca = {
+        type: "point",
+        longitude: 23.589971,
+        latitude: 46.770952,
+      }
+
+
+      const truckPictureMarkerSymbol = {
+        type: "picture-marker",
+        url: "../../assets/pickup.png",
+        width: "28px",
+        height: "28px"
+      }
+      const pictureMarkerSymbolBucharest = {
+        type: "picture-marker",
+        url: "../../assets/start_icon.png",
+        width: "28px",
+        height: "28px"
+      };
+      const pictureMarkerSymbolClujNapoca= {
+        type: "picture-marker",
+        url: "../../assets/finish_point.png",
+        width: "28px",
+        height: "28px"
+      };
+
+      const truck = new Graphic({
+        geometry: pointCenterBucharest,
+        symbol: truckPictureMarkerSymbol
+      })
+      const pointGraphicBucharest = new Graphic({
+        geometry: pointCenterBucharest,
+        symbol: pictureMarkerSymbolBucharest
+      });
+      const pointGraphicClujNapoca = new Graphic({
+        geometry: pointCenterClujNapoca,
+        symbol: pictureMarkerSymbolClujNapoca
+      });
+
+      graphicsLayer.add(pointGraphicBucharest);
+      graphicsLayer.add(pointGraphicClujNapoca);
+      graphicsLayer.add(truck);
+
+      this.map.add(graphicsLayer);
+
+      // Initialize the MapView
         const mapViewProperties = {
             container: this.mapViewEl.nativeElement,
             center: [ 25.601198, 45.939663],
@@ -151,9 +206,62 @@ export class ClientComponent implements OnInit {
         };
 
         this.view = new MapView(mapViewProperties);
-       
-      
-       
+
+      const routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
+
+      const routeParams = new RouteParameters({
+        stops: new FeatureSet({
+          features: [pointGraphicBucharest, pointGraphicClujNapoca]
+        }),
+
+        returnDirections: true
+
+      });
+
+      route.solve(routeUrl, routeParams)
+        .then(async (data) => {
+          for (const result of data.routeResults) {
+            result.route.symbol = {
+              type: "simple-line",
+              color: [5, 150, 255],
+              width: 3
+            };
+            this.view.graphics.add(result.route);
+            for await (let entry of result.route.geometry.paths[0]) {
+              truck.geometry.longitude = entry[0];
+              truck.geometry.latitude = entry[1];
+              graphicsLayer.add(truck);
+
+              this.map.add(graphicsLayer);
+              await new Promise(r => setTimeout(r, 100));
+            }
+          }
+
+          // Display directions
+          if (data.routeResults.length > 0) {
+            const directions = document.createElement("ol");
+            // @ts-ignore
+            directions.classList = "esri-widget esri-widget--panel esri-directions__scroller";
+            directions.style.marginTop = "0";
+            directions.style.padding = "15px 15px 15px 30px";
+            const features = data.routeResults[0].directions.features;
+
+            // Show each direction
+            features.forEach(function (result, i) {
+              const direction = document.createElement("li");
+              direction.innerHTML = result.attributes.text + " (" + result.attributes.length.toFixed(2) + " miles)";
+              directions.appendChild(direction);
+            });
+
+            this.view.ui.empty("top-right");
+            this.view.ui.add(directions, "top-right");
+          }
+
+        }).catch(function(error){
+        console.log(error);
+      });
+
+
         // Fires `pointer-move` event when user clicks on "Shift"
         // key and moves the pointer on the view.
         this.view.on('pointer-move', ["Shift"], (event) => {
@@ -169,6 +277,7 @@ export class ClientComponent implements OnInit {
         throw error;
     }
 }
+
 
 addFeatureLayers() {
     // Trailheads feature layer (points)
