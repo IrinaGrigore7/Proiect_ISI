@@ -16,6 +16,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TranporterComponent } from './tranporter/tranporter.component';
 import { ClientComponent } from './client/client.component';
 import { AdminComponent } from './admin/admin.component';
+import {MatTableModule} from '@angular/material/table';
 
 
 @NgModule({
@@ -36,8 +37,9 @@ import { AdminComponent } from './admin/admin.component';
     FormsModule,
     ReactiveFormsModule,
     MatSnackBarModule,
-    BrowserAnimationsModule
-  ],
+    BrowserAnimationsModule,
+    MatTableModule
+ ],
   providers: [],
   bootstrap: [AppComponent]
 })

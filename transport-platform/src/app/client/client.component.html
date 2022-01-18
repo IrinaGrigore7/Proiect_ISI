@@ -1,37 +1,183 @@
 <div *ngIf = "showmap == false" class="container" style = "display: flex;">
     <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
         <div>
-            <input type="button" value="Contractele mele">
+            <input (click)="showContracts()" type="button" value="Contractele mele">
         </div>
         <div>
             <input (click)="addRequest()" type="button" value="   Adauga cerere ">
         </div>
         <div>
-            <input (click)="ShowTracks()" type="button" value="   Vezi camioane ">
+            <input (click)="ShowOffers()" type="button" value="       Vezi oferte   ">
         </div>
         <div>
             <input (click)="initializeMap()" type="button" value="       Vezi harta     ">
         </div>
         
     </div>
-    <div class="list-group" *ngIf="showtracks" style = "display: flex; flex-direction: column;">
-        <div class="users" *ngFor="let track of tracks; index as i;">
-            <p>Data plecare: {{track.data_plecare}} 
-                <br> Data sosire: {{track.data_sosire}} 
-                <br>Loc plecare: {{track.loc_plecare}}
-                <br>Loc sosire: {{track.loc_sosire}}
-                <br>Tip camion: {{track.tip_camion}}
-                <br>Volum: {{track.volum}}
-                <br>Gabarit: {{track.gabarit}}
-                <br>Greutate: {{track.greutate}}
-                <br>Pret: {{track.pret}}
-                <br>Numar telefon: {{track.numar_tel}}
-                <br><button (click)="TakeTrack(i)">Rezerva camion</button>
-            </p>  
-        </div>
-      </div>
-    <div>
-        <form [formGroup]="addRequestForm" *ngIf="add">
+    <div style = "width:1000px; display: flex; flex-direction: column; justify-content: center;">
+        <div *ngIf="showoffers">
+            <table mat-table [dataSource]="offers" class="mat-elevation-z8">
+                <!-- <ng-container matColumnDef="nr_inmatriculare">
+                    <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
+                  </ng-container> -->
+                <ng-container matColumnDef="data_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="gabarit">
+                    <th mat-header-cell *matHeaderCellDef> Gabarit </th>
+                    <td mat-cell *matCellDef="let element"> {{element.gabarit}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="greutate">
+                    <th mat-header-cell *matHeaderCellDef> Greutate </th>
+                    <td mat-cell *matCellDef="let element"> {{element.greutate}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="volum">
+                    <th mat-header-cell *matHeaderCellDef>  Volum </th>
+                    <td mat-cell *matCellDef="let element"> {{element.volum}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="pret_gol">
+                    <th mat-header-cell *matHeaderCellDef> Pret gol </th>
+                    <td mat-cell *matCellDef="let element"> {{element.pret_gol}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="pret_incarcat">
+                    <th mat-header-cell *matHeaderCellDef> Pret incarcat </th>
+                    <td mat-cell *matCellDef="let element"> {{element.pret_incarcat}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel">
+                    <th mat-header-cell *matHeaderCellDef> Numar telefon </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef> Email </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="rezerva_camion">
+                    <th mat-header-cell *matHeaderCellDef> Rezerva camion </th>
+                    <td mat-cell *matCellDef="let element"> <button (click)="GiveProducts(element)"  mat-button >Rezerva</button> </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsOffers"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsOffers;"></tr>
+            </table>
+          </div>
+          <div *ngIf="showsugestions">
+            <table mat-table [dataSource]="offersAux" class="mat-elevation-z8">
+                <!-- <ng-container matColumnDef="nr_inmatriculare">
+                    <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
+                  </ng-container> -->
+                <ng-container matColumnDef="data_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="gabarit">
+                    <th mat-header-cell *matHeaderCellDef> Gabarit </th>
+                    <td mat-cell *matCellDef="let element"> {{element.gabarit}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="greutate">
+                    <th mat-header-cell *matHeaderCellDef> Greutate </th>
+                    <td mat-cell *matCellDef="let element"> {{element.greutate}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="volum">
+                    <th mat-header-cell *matHeaderCellDef>  Volum </th>
+                    <td mat-cell *matCellDef="let element"> {{element.volum}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="pret_gol">
+                    <th mat-header-cell *matHeaderCellDef> Pret gol </th>
+                    <td mat-cell *matCellDef="let element"> {{element.pret_gol}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="pret_incarcat">
+                    <th mat-header-cell *matHeaderCellDef> Pret incarcat </th>
+                    <td mat-cell *matCellDef="let element"> {{element.pret_incarcat}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel">
+                    <th mat-header-cell *matHeaderCellDef> Numar telefon </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef> Email </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="rezerva_camion">
+                    <th mat-header-cell *matHeaderCellDef> Rezerva camion </th>
+                    <td mat-cell *matCellDef="let element"> <button (click)="GiveProducts(element)"  mat-button >Rezerva</button> </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsOffers"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsOffers;"></tr>
+            </table>
+          </div>
+          <div *ngIf="showcontracts">
+            <table mat-table [dataSource]="contracts" class="mat-elevation-z8">
+                <ng-container matColumnDef="email_client">
+                    <th mat-header-cell *matHeaderCellDef> Email client </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email_client}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel_client">
+                    <th mat-header-cell *matHeaderCellDef> Numar tel client </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel_client}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="email_transp">
+                    <th mat-header-cell *matHeaderCellDef> Email transportator </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email_transp}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel_transp">
+                    <th mat-header-cell *matHeaderCellDef> Numar tel transp </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel_transp}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="tarif">
+                    <th mat-header-cell *matHeaderCellDef> Tarif </th>
+                    <td mat-cell *matCellDef="let element"> {{element.tarif}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalii_marfa">
+                    <th mat-header-cell *matHeaderCellDef> Detalii marfa </th>
+                    <td mat-cell *matCellDef="let element"> {{element.detalii_marfa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalii_camion">
+                    <th mat-header-cell *matHeaderCellDef> Detalii camion </th>
+                    <td mat-cell *matCellDef="let element"> {{element.detalii_camion}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="instructiuni_speciale">
+                    <th mat-header-cell *matHeaderCellDef> Instructiuni peciale </th>
+                    <td mat-cell *matCellDef="let element"> {{element.instructiuni_speciale}} </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsContracts"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsContracts;"></tr>
+            </table>
+          </div>
+        <form [formGroup]="addRequestForm" *ngIf="addreq">
             <div class="row">
                 <div class="col-25">
                 <label for="dplecare">Data plecare</label>
@@ -123,6 +269,9 @@
             <div class="row">
               <input type="submit" value="Adauga cerere" (click)="SubmitRequest()">
             </div>
+            <div class="row">
+                <input type="submit" value="Vezi oferte disponibile" (click)="MatchingOffers()">
+              </div>
         </form>
     </div>
 

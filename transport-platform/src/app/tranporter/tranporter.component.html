@@ -4,31 +4,429 @@
             <input (click)="ShowRequests()" type="button" value="     Vezi cereri     ">
         </div>
         <div>
-            <input type="button" value="Contractele mele">
+            <input (click)="ShowContracts()" type="button" value="Contractele mele">
+        </div>
+        <div>
+            <input (click)="ShowTracks()" type="button" value="   Vezi camioane ">
         </div>
         <div>
             <input (click)="addTrack()" type="button" value="   Adauga camion">
         </div>
-    </div>
-    <div class="list-group" *ngIf="showreq" style = "display: flex; flex-direction: column;">
-        <div class="users" *ngFor="let request of requests; index as i;">
-            <p>Data plecare: {{request.data_plecare}}
-                <br> data maxima plecare: {{request.data_max_plecare}}  
-                <br> Data sosire: {{request.data_sosire}} 
-                <br> Data maxima sosire: {{request.data_max_sosire}} 
-                <br>Loc plecare: {{request.loc_plecare}}
-                <br>Loc sosire: {{request.loc_sosire}}
-                <br>Tip marfa: {{request.tip_marfa}}
-                <br>Masa: {{request.masa}}
-                <br>Volum: {{request.volum}}
-                <br>Buget: {{request.buget}}
-                <br>Numar telefon: {{request.numar_tel}}
-                <br><button (click)="TakeProducts(i)">Preia marfa</button>
-            </p>  
+        <div>
+            <input (click)="showOffers()" type="button" value="     Arata oferte    ">
         </div>
-      </div>
-    <div style = "width: 70%">
-        <form [formGroup]="addTrackForm" *ngIf="add">
+    </div>
+    
+    <div style = "width:1000px; display: flex; flex-direction: column; justify-content: center;">
+        <div *ngIf="showreq">
+            <!-- <table mat-table [dataSource]="requests" class="mat-elevation-z8 demo-table">
+                <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnDef">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{column.header}}
+                  </th>
+                  <td mat-cell *matCellDef="let row">
+                    {{column.cell(row)}}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="actiune">
+                    <th mat-header-cell *matHeaderCellDef> Cereri </th>
+                    <td mat-cell *matCellDef="let element"> <button mat-button >Preia marfa</button> </td>
+                  </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table> -->
+            <table mat-table [dataSource]="requests" class="mat-elevation-z8">
+                <ng-container matColumnDef="data_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_max_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data maxima plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_max_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_max_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data maxima sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_max_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="tip_marfa">
+                    <th mat-header-cell *matHeaderCellDef> Tip marfa </th>
+                    <td mat-cell *matCellDef="let element"> {{element.tip_marfa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="masa">
+                    <th mat-header-cell *matHeaderCellDef> Masa </th>
+                    <td mat-cell *matCellDef="let element"> {{element.masa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="volum">
+                    <th mat-header-cell *matHeaderCellDef> Volum </th>
+                    <td mat-cell *matCellDef="let element"> {{element.volum}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="buget">
+                    <th mat-header-cell *matHeaderCellDef> Buget disponibil </th>
+                    <td mat-cell *matCellDef="let element"> {{element.buget}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel">
+                    <th mat-header-cell *matHeaderCellDef> Numar telefon </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="actiune">
+                    <th mat-header-cell *matHeaderCellDef> Cereri </th>
+                    <td mat-cell *matCellDef="let element"> <button (click)="TakeProducts(element)" mat-button >Preia marfa</button> </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsReq"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsReq;"></tr>
+            </table>
+          </div>
+          <div *ngIf="showsugestions">
+            <table mat-table [dataSource]="requestsAux" class="mat-elevation-z8">
+                <ng-container matColumnDef="data_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_max_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data maxima plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_max_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_max_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data maxima sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_max_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="tip_marfa">
+                    <th mat-header-cell *matHeaderCellDef> Tip marfa </th>
+                    <td mat-cell *matCellDef="let element"> {{element.tip_marfa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="masa">
+                    <th mat-header-cell *matHeaderCellDef> Masa </th>
+                    <td mat-cell *matCellDef="let element"> {{element.masa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="volum">
+                    <th mat-header-cell *matHeaderCellDef> Volum </th>
+                    <td mat-cell *matCellDef="let element"> {{element.volum}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="buget">
+                    <th mat-header-cell *matHeaderCellDef> Buget disponibil </th>
+                    <td mat-cell *matCellDef="let element"> {{element.buget}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel">
+                    <th mat-header-cell *matHeaderCellDef> Numar telefon </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="actiune">
+                    <th mat-header-cell *matHeaderCellDef> Cereri </th>
+                    <td mat-cell *matCellDef="let element"> <button (click)="TakeProducts(element)" mat-button >Preia marfa</button> </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsReq"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsReq;"></tr>
+            </table>
+          </div>
+          <div *ngIf="showtracks">
+            <table mat-table [dataSource]="tracks" class="mat-elevation-z8">
+                <ng-container matColumnDef="nr_inmatriculare">
+                    <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
+                  </ng-container>
+                <ng-container matColumnDef="tip_camion">
+                    <th mat-header-cell *matHeaderCellDef> Tip camion </th>
+                    <td mat-cell *matCellDef="let element"> {{element.tip_camion}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="volum">
+                    <th mat-header-cell *matHeaderCellDef> Volum </th>
+                    <td mat-cell *matCellDef="let element"> {{element.volum}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="gabarit">
+                    <th mat-header-cell *matHeaderCellDef> Gabarit </th>
+                    <td mat-cell *matCellDef="let element"> {{element.gabarit}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="greutate">
+                    <th mat-header-cell *matHeaderCellDef> Greutate </th>
+                    <td mat-cell *matCellDef="let element"> {{element.greutate}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="pret_gol">
+                    <th mat-header-cell *matHeaderCellDef> Pret (camion gol) </th>
+                    <td mat-cell *matCellDef="let element"> {{element.pret_gol}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="pret_incarcat">
+                    <th mat-header-cell *matHeaderCellDef> Pret (camion incarcat) </th>
+                    <td mat-cell *matCellDef="let element"> {{element.pret_incarcat}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="actiune">
+                    <th mat-header-cell *matHeaderCellDef> Oferte </th>
+                    <td mat-cell *matCellDef="let element"> <button (click)="addOffer(element.nr_inmatriculare)" mat-button >Adauga oferta</button> </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+          <div *ngIf="showoffers">
+            
+            <table mat-table [dataSource]="offers" class="mat-elevation-z8">
+                <ng-container matColumnDef="nr_inmatriculare">
+                    <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
+                  </ng-container>
+                <ng-container matColumnDef="data_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Data plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_max_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="data_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Data sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.data_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel">
+                    <th mat-header-cell *matHeaderCellDef> Numar telefon </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef> Email </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsOffers"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsOffers;"></tr>
+            </table>
+          </div>
+          <div *ngIf="showcontracts">
+            <table mat-table [dataSource]="contracts" class="mat-elevation-z8">
+                <ng-container matColumnDef="email_client">
+                    <th mat-header-cell *matHeaderCellDef> Email client </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email_client}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel_client">
+                    <th mat-header-cell *matHeaderCellDef> Numar tel client </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel_client}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="email_transp">
+                    <th mat-header-cell *matHeaderCellDef> Email transportator </th>
+                    <td mat-cell *matCellDef="let element"> {{element.email_transp}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="numar_tel_transp">
+                    <th mat-header-cell *matHeaderCellDef> Numar tel transp </th>
+                    <td mat-cell *matCellDef="let element"> {{element.numar_tel_transp}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_plecare">
+                    <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_plecare}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="loc_sosire">
+                    <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+                    <td mat-cell *matCellDef="let element"> {{element.loc_sosire}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="tarif">
+                    <th mat-header-cell *matHeaderCellDef> Tarif </th>
+                    <td mat-cell *matCellDef="let element"> {{element.tarif}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalii_marfa">
+                    <th mat-header-cell *matHeaderCellDef> Detalii marfa </th>
+                    <td mat-cell *matCellDef="let element"> {{element.detalii_marfa}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalii_camion">
+                    <th mat-header-cell *matHeaderCellDef> Detalii camion </th>
+                    <td mat-cell *matCellDef="let element"> {{element.detalii_camion}} </td>
+                  </ng-container>
+                  <ng-container matColumnDef="instructiuni_speciale">
+                    <th mat-header-cell *matHeaderCellDef> Instructiuni peciale </th>
+                    <td mat-cell *matCellDef="let element"> {{element.instructiuni_speciale}} </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsContracts"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsContracts;"></tr>
+            </table>
+          </div>
+        
+        <form [formGroup]="addTrackForm" *ngIf="addtrack">
+            <!-- <div class="row">
+                <div class="col-25">
+                <label for="dplecare">Data plecare</label>
+                </div>
+                <div >
+                <input type="date" id="dplecare" placeholder="Data plecare..."  formControlName="data_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lplecare">Loc plecare</label>
+                </div>
+                <div >
+                <input type="text" id="lplecare"  placeholder="Loc plecare.." formControlName="loc_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="dsosire">Data sosire</label>
+                </div>
+                <div >
+                <input type="date" id="dsosore" placeholder="Data sosire..."  formControlName="data_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lsosire">Loc sosire</label>
+                </div>
+                <div >
+                <input type="text" id="lsosire"  placeholder="Loc sosire.." formControlName="loc_sosire">
+                </div>
+            </div> -->
+            <div class="row">
+                <div >
+                <label for="nrinmatriculare">Numar de inmatriculare</label>
+                </div>
+                <div  >
+                <input type="text" id="nrinmatriculare"  placeholder="Nr inmatriculare.." formControlName="nr_inmatriculare">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="tipcamion">Tip camion (marca)</label>
+                </div>
+                <div  >
+                <input type="text" id="tipcamion"  placeholder="Tip camion.." formControlName="tip_camion">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="volum">Volum (m^3)</label>
+                </div>
+                <div >
+                <input type="number" id="volum"  placeholder="Volum.." formControlName="volum">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="gabarit">Gabarit (lungime, latime, inaltime)</label>
+                </div>
+                <div >
+                <input type="number" id="gabarit"  placeholder="Gabarit.." formControlName="gabarit">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="greutate">Greutate (tone)</label>
+                </div>
+                <div >
+                <input type="number" id="greutate"  placeholder="Greutate.." formControlName="greutate">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="pret">Pret (camion gol)</label>
+                </div>
+                <div >
+                <input type="number" id="pret"  placeholder="Pret.." formControlName="pret_gol">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="pret">Pret (camion incarcat)</label>
+                </div>
+                <div >
+                <input type="number" id="pret"  placeholder="Pret.." formControlName="pret_incarcat">
+                </div>
+            </div>
+            <!-- <div class="row">
+                <div >
+                <label for="numar_tel">Numar de telefon</label>
+                </div>
+                <div >
+                <input type="text" id="numar_tel"  placeholder="Numar telefon.." formControlName="numar_tel">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="numar_tel">Email</label>
+                </div>
+                <div >
+                <input type="text" id="numar_tel"  placeholder="Email.." formControlName="numar_tel">
+                </div>
+            </div> -->
+            <div class="row">
+              <input type="submit" value="Adauga camion" (click)="SubmitTrack()">
+            </div>
+        </form>
+    <!-- </div> -->
+    <!-- <div style = "width: 70%; display: flex; flex-direction: column; justify-content: center;"> -->
+        <form [formGroup]="addTrackForm" *ngIf="addtrack">
+            <!-- <div class="row">
+                <div class="col-25">
+                <label for="dplecare">Data plecare</label>
+                </div>
+                <div >
+                <input type="date" id="dplecare" placeholder="Data plecare..."  formControlName="data_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lplecare">Loc plecare</label>
+                </div>
+                <div >
+                <input type="text" id="lplecare"  placeholder="Loc plecare.." formControlName="loc_plecare">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-25">
+                <label for="dsosire">Data sosire</label>
+                </div>
+                <div >
+                <input type="date" id="dsosore" placeholder="Data sosire..."  formControlName="data_sosire">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="lsosire">Loc sosire</label>
+                </div>
+                <div >
+                <input type="text" id="lsosire"  placeholder="Loc sosire.." formControlName="loc_sosire">
+                </div>
+            </div> -->
+            <!-- <div class="row">
+                <div >
+                <label for="numar_tel">Numar de telefon</label>
+                </div>
+                <div >
+                <input type="text" id="numar_tel"  placeholder="Numar telefon.." formControlName="numar_tel">
+                </div>
+            </div>
+            <div class="row">
+                <div >
+                <label for="numar_tel">Email</label>
+                </div>
+                <div >
+                <input type="text" id="numar_tel"  placeholder="Email.." formControlName="numar_tel">
+                </div>
+            </div> -->
+            <!-- <div class="row">
+              <input type="submit" value="Adauga camion" (click)="SubmitTrack()">
+            </div> -->
+        </form>
+        <form [formGroup]="addOfferForm" *ngIf="addoffer">
             <div class="row">
                 <div class="col-25">
                 <label for="dplecare">Data plecare</label>
@@ -63,56 +461,29 @@
             </div>
             <div class="row">
                 <div >
-                <label for="tipcamion">Tip camion</label>
-                </div>
-                <div >
-                <input type="text" id="tipcamion"  placeholder="Tip camion.." formControlName="tip_camion">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="volum">Volum</label>
-                </div>
-                <div >
-                <input type="number" id="volum"  placeholder="Volum.." formControlName="volum">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="gabarit">Gabarit</label>
-                </div>
-                <div >
-                <input type="number" id="gabarit"  placeholder="Gabarit.." formControlName="gabarit">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="greutate">Greutate</label>
-                </div>
-                <div >
-                <input type="number" id="greutate"  placeholder="Greutate.." formControlName="greutate">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="pret">Pret</label>
-                </div>
-                <div >
-                <input type="number" id="pret"  placeholder="Pret.." formControlName="pret">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="numar_tel">Date de contact (numar de telefon)</label>
+                <label for="numar_tel">Numar de telefon</label>
                 </div>
                 <div >
                 <input type="text" id="numar_tel"  placeholder="Numar telefon.." formControlName="numar_tel">
                 </div>
             </div>
             <div class="row">
-              <input type="submit" value="Adauga camion" (click)="SubmitTrack()">
+                <div >
+                <label for="email">Email</label>
+                </div>
+                <div >
+                <input type="text" id="email"  placeholder="Email.." formControlName="email">
+                </div>
             </div>
+            <div class="row">
+              <input type="submit" value="Adauga oferta" (click)="addTrackOffer()">
+            </div>
+            <div class="row">
+                <input type="submit" value="Vezi cereri disponibile" (click)="MatchingRequests()">
+              </div>
         </form>
     </div>
 
+
 </div>
+
