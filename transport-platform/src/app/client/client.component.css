@@ -1,5 +1,5 @@
 .container {
-    background-color: #06C3BD;
+    background-color:azure;
     height: 100%;
     width: 100%;
     position: absolute;
@@ -26,4 +26,29 @@ input[type=button] {
 
 table {
     width: 100%;
+  }
+
+  .example-full-width {
+    min-width: 150px;
+    max-width: 500px;
+    width: 30%;
+    background-color: aliceblue;
+  }
+
+  .column1{
+    min-width: 150px;
+    max-width: 500px;
+    width: 30%;
+    background-color: aliceblue;
+    padding: 12px 20px;
+    border: none;
+  }
+
+  .column2 {
+    min-width: 150px;
+    max-width: 500px;
+    width: 30%;
+    background-color: aliceblue;
+    padding: 12px 20px;
+    border: none;
   }

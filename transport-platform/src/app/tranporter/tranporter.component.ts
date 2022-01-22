@@ -32,6 +32,11 @@ export class TranporterComponent implements OnInit {
       this.fs.collection('requests').get().forEach(value =>
       value.forEach(value => {
         const val: ReqItem = value.data() as ReqItem
+        const date = new Date(val['data_plecare']['seconds']*1000);
+        val['data_plecare'] = date.toLocaleDateString("en-US")
+        val['data_sosire'] = (new Date(val['data_sosire']['seconds']*1000)).toLocaleDateString("en-US")
+        val['data_max_sosire'] = (new Date(val['data_max_sosire']['seconds']*1000)).toLocaleDateString("en-US")
+        val['data_max_plecare'] = (new Date(val['data_max_plecare']['seconds']*1000)).toLocaleDateString("en-US")
         this.requests.push(val)
         this.idList.push(value.id)
       }
@@ -275,12 +280,12 @@ export interface OfferInfo {
 export interface ReqItem {
   id_cerere: string,
   id_client: string,
-  data_plecare: Date,
+  data_plecare: string,
   loc_plecare: string,
-  data_max_plecare: Date,
-  data_sosire: Date,
+  data_max_plecare: string,
+  data_sosire: string,
   loc_sosire: string,
-  data_max_sosire: Date,
+  data_max_sosire: string,
   tip_marfa: string,
   masa: number,
   volum: number,

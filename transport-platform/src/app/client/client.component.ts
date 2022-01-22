@@ -4,14 +4,50 @@ import { FormBuilder } from '@angular/forms';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { LocalStorageService } from '../services/local-storage.service';
 import { setDefaultOptions, loadModules } from 'esri-loader';
+import {FormControl} from '@angular/forms';
+import {Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import localitati from '../../assets/localitati.json'
+import DatePicker from 'esri/widgets/support/DatePicker';
 
+export interface Settlements {
+  id: number, nume: string,diacritice: string,judet: string,auto:string,zip: number,populatie: number,lat: number,lng: number
+}
 
 @Component({
   selector: 'app-client',
   templateUrl: './client.component.html',
   styleUrls: ['./client.component.css']
 })
-export class ClientComponent implements OnInit {
+export class ClientComponent implements OnInit{
+   myControl = new FormControl();
+  options: Settlements[] = localitati
+  filteredOptions1: Observable<Settlements[]> ;
+  filteredOptions2: Observable<Settlements[]> ;
+  selectedValue: string;
+
+  ngOnInit() {
+    this.filteredOptions1 = this.addRequestForm.controls['loc_plecare'].valueChanges.pipe(
+      startWith(''),
+      map(value => (typeof value === 'string' ? value : value.nume)),
+      map(name => (name ? this._filter(name) : this.options.slice())),
+    );
+    this.filteredOptions2 = this.addRequestForm.controls['loc_sosire'].valueChanges.pipe(
+      startWith(''),
+      map(value => (typeof value === 'string' ? value : value.nume)),
+      map(name => (name ? this._filter(name) : this.options.slice())),
+    );
+  }
+
+  displayFn(user: Settlements): string {
+    return user && user.nume ? user.nume : '';
+  }
+
+  private _filter(name: string): Settlements[] {
+    const filterValue = name.toLowerCase();
+
+    return this.options.filter(option => option.nume.toLowerCase().includes(filterValue));
+  }
   offers: Array<OfferInfo> = []
   idList: Array<string> = []
   contracts: Array<ContractInfo> = []
@@ -25,10 +61,11 @@ export class ClientComponent implements OnInit {
   graphicsLayer: __esri.GraphicsLayer;
   routeCoordinates: Array<any> = []
   // displayedColumnsReq: string[] = [ 'id_transp' ,'data_plecare','loc_plecare','data_sosire','loc_sosire','tip_camion','volum','gabarit','greutate','pret','numar_tel'];
-  client : User
+  client : User1
   currentReq: ReqItem
   offersAux: Array<OfferInfo> = []
   offerId: string
+  products: Array<string> = []
   _Map;
   _MapView;
   _FeatureLayer;
@@ -69,14 +106,20 @@ export class ClientComponent implements OnInit {
     }
     )
   );   
+  this.fs.collection('products').get().forEach(value =>
+    value.forEach(value => {
+      const val: string = value.data() as string
+    
+        this.products.push(val['name'])
+    }
+    )
+  );   
 
   this.fs.collection("users").doc(this.localStorage.getItem("UserID")).get().forEach(value => {
-    this.client = value.data() as User
+    this.client = value.data() as User1
   })
   }
 
-  ngOnInit(): void {
-  }
 
   addreq: boolean = false;
   showtracks: boolean = false;
@@ -155,7 +198,7 @@ export class ClientComponent implements OnInit {
   GiveProducts(oferta: OfferInfo) {
     console.log("jdjdjjdjdj")
     this.fs.collection('users').doc(oferta.id_transp).get().forEach(value => {
-      let transportator = value.data() as User
+      let transportator = value.data() as User1
       let item: ContractInfo = {
         id_client: this.localStorage.getItem("UserID"),
         id_transp: oferta.id_transp ,
@@ -424,7 +467,7 @@ addFeatureLayers() {
 
 }
 
-export interface User{
+export interface User1{
   email: string,
   username: string,
   type: string
@@ -458,12 +501,12 @@ export interface OfferInfo {
 export interface ReqItem {
   id_cerere: string,
   id_client: string,
-  data_plecare: Date,
+  data_plecare: DatePicker,
   loc_plecare: string,
-  data_max_plecare: Date,
-  data_sosire: Date,
+  data_max_plecare: DatePicker,
+  data_sosire: DatePicker,
   loc_sosire: string,
-  data_max_sosire: Date,
+  data_max_sosire: DatePicker,
   tip_marfa: string,
   masa: number,
   volum: number,

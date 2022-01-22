@@ -17,10 +17,6 @@
     <div style = "width:1000px; display: flex; flex-direction: column; justify-content: center;">
         <div *ngIf="showoffers">
             <table mat-table [dataSource]="offers" class="mat-elevation-z8">
-                <!-- <ng-container matColumnDef="nr_inmatriculare">
-                    <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
-                    <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
-                  </ng-container> -->
                 <ng-container matColumnDef="data_plecare">
                     <th mat-header-cell *matHeaderCellDef> Data plecare </th>
                     <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
@@ -75,10 +71,6 @@
           </div>
           <div *ngIf="showsugestions">
             <table mat-table [dataSource]="offersAux" class="mat-elevation-z8">
-                <!-- <ng-container matColumnDef="nr_inmatriculare">
-                    <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
-                    <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
-                  </ng-container> -->
                 <ng-container matColumnDef="data_plecare">
                     <th mat-header-cell *matHeaderCellDef> Data plecare </th>
                     <td mat-cell *matCellDef="let element"> {{element.data_plecare}} </td>
@@ -178,100 +170,105 @@
             </table>
           </div>
         <form [formGroup]="addRequestForm" *ngIf="addreq">
-            <div class="row">
-                <div class="col-25">
-                <label for="dplecare">Data plecare</label>
-                </div>
-                <div >
-                <input type="date" id="dplecare" placeholder="Data plecare..."  formControlName="data_plecare">
-                </div>
+          <div style="display: flex; flex-direction: row;">
+              <mat-form-field class="column1" appearance="fill">
+                <mat-label>Data plecare</mat-label>
+                <input matInput [matDatepicker]="picker1" formControlName="data_plecare">
+                <mat-datepicker-toggle matSuffix [for]="picker1">
+                  <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker1></mat-datepicker>
+              </mat-form-field>
+          
+              <mat-form-field class="column2" appearance="fill">
+                <mat-label>Data sosire</mat-label>
+                <input matInput [matDatepicker]="picker3" >
+                <mat-datepicker-toggle matSuffix [for]="picker3" formControlName="data_sosire">
+                  <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker3></mat-datepicker>
+              </mat-form-field>
             </div>
-            <div class="row">
-                <div >
-                <label for="lplecare">Loc plecare</label>
-                </div>
-                <div >
-                <input type="text" id="lplecare"  placeholder="Loc plecare.." formControlName="loc_plecare">
-                </div>
+            <div style="display: flex; flex-direction: row;">
+              <mat-form-field class="column1" appearance="fill">
+                <mat-label>Data maxima plecare</mat-label>
+                <input matInput [matDatepicker]="picker2" >
+                <mat-datepicker-toggle matSuffix [for]="picker2" formControlName="data_max_plecare">
+                  <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker2></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field class="column2" appearance="fill">
+                <mat-label>Data maxima sosire</mat-label>
+                <input matInput [matDatepicker]="picker4" formControlName="data_max_sosire">
+                <mat-datepicker-toggle matSuffix [for]="picker4">
+                  <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker4></mat-datepicker>
+              </mat-form-field>
             </div>
-            <div class="row">
-                <div class="col-25">
-                <label for="dmaxplecare">Data maxima plecare</label>
-                </div>
-                <div >
-                <input type="date" id="dmaxplecare" placeholder="Data maximaplecare..."  formControlName="data_max_plecare">
-                </div>
+            <div style="display: flex; flex-direction: row;">
+              <mat-form-field class="column1" appearance="fill">
+                <mat-label>Loc plecare</mat-label>
+                <input type="text" matInput formControlName="loc_plecare" [matAutocomplete]="auto1">
+                <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayFn">
+                  <mat-option *ngFor="let option of filteredOptions1 | async" [value]="option">
+                    {{option.nume}}, {{option.judet}}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+              <mat-form-field class="column2" appearance="fill">
+                <mat-label>Loc sosire</mat-label>
+                <input type="text" matInput formControlName="loc_sosire" [matAutocomplete]="auto2">
+                <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayFn">
+                  <mat-option *ngFor="let option of filteredOptions2 | async" [value]="option">
+                    {{option.nume}}, {{option.judet}}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
             </div>
-            <div class="row">
-                <div class="col-25">
-                <label for="dsosire">Data sosire</label>
-                </div>
-                <div >
-                <input type="date" id="dsosore" placeholder="Data sosire..."  formControlName="data_sosire">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="lsosire">Loc sosire</label>
-                </div>
-                <div >
-                <input type="text" id="lsosire"  placeholder="Loc sosire.." formControlName="loc_sosire">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-25">
-                <label for="dmaxsosire">Data maxima sosire</label>
-                </div>
-                <div >
-                <input type="date" id="dmaxsosore" placeholder="Data maxima sosire..."  formControlName="data_max_sosire">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="tipmarfa">Tip marfa</label>
-                </div>
-                <div >
-                <input type="text" id="tipmarfa"  placeholder="Tip marfa.." formControlName="tip_marfa">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="masa">Masa</label>
-                </div>
-                <div >
-                <input type="number" id="masa"  placeholder="Masa.." formControlName="masa">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="volum">Volum</label>
-                </div>
-                <div >
-                <input type="number" id="volum"  placeholder="Volum.." formControlName="volum">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="buget">Buget</label>
-                </div>
-                <div >
-                <input type="number" id="buget"  placeholder="Buget.." formControlName="buget">
-                </div>
-            </div>
-            <div class="row">
-                <div >
-                <label for="numar_tel">Date de contact (numar de telefon)</label>
-                </div>
-                <div >
-                <input type="text" id="numar_tel"  placeholder="Numar telefon.." formControlName="numar_tel">
-                </div>
-            </div>
-            <div class="row">
-              <input type="submit" value="Adauga cerere" (click)="SubmitRequest()">
-            </div>
-            <div class="row">
-                <input type="submit" value="Vezi oferte disponibile" (click)="MatchingOffers()">
+            <div style="display: flex; flex-direction: row;">
+              <mat-form-field class="column1" appearance="fill">
+                <mat-label>Tip marfa</mat-label>
+                <mat-select formControlName="tip_marfa">
+                  <mat-option *ngFor="let product of products" [value]="product">
+                    {{product}}
+                  </mat-option>
+                </mat-select>
+                </mat-form-field>
+                <mat-form-field class="column2" appearance="fill">
+                <mat-label>Masa</mat-label>
+                <input type="number" matInput formControlName="masa">
+              </mat-form-field>
+          </div>
+          <div style="display: flex; flex-direction: row;">
+            <mat-form-field class="column1" appearance="fill">
+              <mat-label>Volum</mat-label>
+              <input type="number" matInput formControlName="volum">
+            </mat-form-field>
+              <mat-form-field class="column2" appearance="fill">
+              <mat-label>Buget</mat-label>
+              <input type="number" matInput formControlName="buget">
+            </mat-form-field>
+        </div>
+        <div style="display: flex; flex-direction: row;">
+          <mat-form-field class="column1" appearance="fill">
+            <mat-label>Date de contact (numar de telefon)</mat-label>
+            <input type="text" matInput formControlName="numar_tel">
+          </mat-form-field>
+            <!-- <mat-form-field class="column2" appearance="fill">
+            <mat-label>Detalii</mat-label>
+            <input type="text" matInput formControlName="buget">
+          </mat-form-field> -->
+      </div>
+            <div style="display: flex; flex-direction: row;">
+              <div style="padding:20px 100px; border: none;">
+                <button mat-raised-button (click)="SubmitRequest()" >Adauga cerere</button>
               </div>
+              <div style="padding:20px 100px; border: none;">
+                <button mat-raised-button (click)="MatchingOffers()" >Vezi oferte disponibile</button>
+              </div>
+            </div>
         </form>
     </div>
 
@@ -279,3 +276,4 @@
 <div style="height: 100%;">
     <div #mapViewNode class="arcgis-div"></div>
 </div>
+
