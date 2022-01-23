@@ -49,6 +49,8 @@ export class ClientComponent implements OnInit{
     return this.options.filter(option => option.nume.toLowerCase().includes(filterValue));
   }
   offers: Array<OfferInfo> = []
+  currentOffer: OfferInfo
+
   idList: Array<string> = []
   contracts: Array<ContractInfo> = []
   displayedColumnsOffers: string[] = [ 'data_plecare', 'loc_plecare', 'data_sosire', 'loc_sosire', 'gabarit', 'greutate', 'volum', 'pret_gol', 'pret_incarcat', 'numar_tel','email', 'rezerva_camion'];
@@ -86,13 +88,14 @@ export class ClientComponent implements OnInit{
       this.fs.collection("tracks").doc(val.id_camion).get().forEach(value => {
         let track = value.data() as Track
         val.gabarit = track.gabarit
-        console.log(val.gabarit)
         val.greutate = track.greutate
         val.volum = track.volum
         val.pret_gol = track.pret_gol
         val.pret_incarcat = track.pret_incarcat
+        const date = new Date(val['data_plecare']['seconds']*1000);
+        val['data_plecare'] = date.toLocaleDateString("en-US")
+        val['data_sosire'] = (new Date(val['data_sosire']['seconds']*1000)).toLocaleDateString("en-US")
       })
-      console.log(val)
       this.offers.push(val)
     }
     )
@@ -196,7 +199,8 @@ export class ClientComponent implements OnInit{
   }
 
   GiveProducts(oferta: OfferInfo) {
-    console.log("jdjdjjdjdj")
+    console.log(this.currentReq)
+    this.currentOffer = oferta
     this.fs.collection('users').doc(oferta.id_transp).get().forEach(value => {
       let transportator = value.data() as User1
       let item: ContractInfo = {
@@ -245,7 +249,7 @@ export class ClientComponent implements OnInit{
     };
     this.currentReq = item
     this.offers.forEach(val => {
-      if (item.loc_plecare == val.loc_plecare && item.loc_sosire == val.loc_sosire) {
+      if (item.loc_plecare['nume'] == val.loc_plecare['nume'] && item.loc_sosire['nume'] == val.loc_sosire['nume']) {
         this.offersAux.push(val)
       }
     })
@@ -264,7 +268,6 @@ export class ClientComponent implements OnInit{
         // also lazy load the CSS for the version of
         // the script that you're loading from the CDN
         setDefaultOptions({ css: true });
-
 
         // Load the modules for the ArcGIS API for JavaScript
         const [Map, MapView, FeatureLayer, Graphic, GraphicsLayer, route, RouteParameters, FeatureSet, esriConfig, PictureMarkerSymbol] = await loadModules([
@@ -304,14 +307,14 @@ export class ClientComponent implements OnInit{
 
       const pointCenterBucharest = { //Create a point
         type: "point",
-        longitude: 26.102866,
-        latitude: 44.428054,
+        longitude: this.currentReq.loc_plecare['lng'],
+        latitude: this.currentReq.loc_plecare['lat'],
       };
 
       const pointCenterClujNapoca = {
         type: "point",
-        longitude: 23.589971,
-        latitude: 46.770952,
+        longitude:this.currentReq.loc_sosire['lng'],
+        latitude: this.currentReq.loc_sosire['lat'],
       }
 
 
@@ -486,9 +489,9 @@ export interface OfferInfo {
   id_camion: string,
   id_transp:string,
   nr_inmatriculare: string,
-  data_plecare: Date,
+  data_plecare: string,
     loc_plecare: string,
-    data_sosire: Date,
+    data_sosire: string,
     loc_sosire: string,
     numar_tel: string,
     email: string,
@@ -501,12 +504,12 @@ export interface OfferInfo {
 export interface ReqItem {
   id_cerere: string,
   id_client: string,
-  data_plecare: DatePicker,
+  data_plecare: Date,
   loc_plecare: string,
-  data_max_plecare: DatePicker,
-  data_sosire: DatePicker,
+  data_max_plecare: Date,
+  data_sosire: Date,
   loc_sosire: string,
-  data_max_sosire: DatePicker,
+  data_max_sosire: Date,
   tip_marfa: string,
   masa: number,
   volum: number,

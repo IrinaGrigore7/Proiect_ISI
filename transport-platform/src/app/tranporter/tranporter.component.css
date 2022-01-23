@@ -23,3 +23,21 @@ input[type=button] {
   table {
     width: 100%;
   }
+
+  .column1{
+    min-width: 150px;
+    max-width: 500px;
+    width: 30%;
+    background-color: aliceblue;
+    padding: 12px 20px;
+    border: none;
+  }
+
+  .column2 {
+    min-width: 150px;
+    max-width: 500px;
+    width: 30%;
+    background-color: aliceblue;
+    padding: 12px 20px;
+    border: none;
+  }

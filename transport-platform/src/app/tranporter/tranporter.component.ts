@@ -3,13 +3,49 @@ import { Validators } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { LocalStorageService } from '../services/local-storage.service';
+import localitati from '../../assets/localitati.json'
+import {Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
 
+
+export interface Settlements {
+  id: number, nume: string,diacritice: string,judet: string,auto:string,zip: number,populatie: number,lat: number,lng: number
+}
 @Component({
   selector: 'app-tranporter',
   templateUrl: './tranporter.component.html',
   styleUrls: ['./tranporter.component.css']
 })
+
+
 export class TranporterComponent implements OnInit {
+  options: Settlements[] = localitati
+  filteredOptions1: Observable<Settlements[]> ;
+  filteredOptions2: Observable<Settlements[]> ;
+  selectedValue: string;
+
+  ngOnInit() {
+    this.filteredOptions1 = this.addOfferForm.controls['loc_plecare'].valueChanges.pipe(
+      startWith(''),
+      map(value => (typeof value === 'string' ? value : value.nume)),
+      map(name => (name ? this._filter(name) : this.options.slice())),
+    );
+    this.filteredOptions2 = this.addOfferForm.controls['loc_sosire'].valueChanges.pipe(
+      startWith(''),
+      map(value => (typeof value === 'string' ? value : value.nume)),
+      map(name => (name ? this._filter(name) : this.options.slice())),
+    );
+  }
+
+  displayFn(user: Settlements): string {
+    return user && user.nume ? user.nume : '';
+  }
+
+  private _filter(name: string): Settlements[] {
+    const filterValue = name.toLowerCase();
+
+    return this.options.filter(option => option.nume.toLowerCase().includes(filterValue));
+  }
   requests: Array<ReqItem> = []
   tracks: Array<Track> = []
   offers: Array<OfferInfo> = []
@@ -37,6 +73,7 @@ export class TranporterComponent implements OnInit {
         val['data_sosire'] = (new Date(val['data_sosire']['seconds']*1000)).toLocaleDateString("en-US")
         val['data_max_sosire'] = (new Date(val['data_max_sosire']['seconds']*1000)).toLocaleDateString("en-US")
         val['data_max_plecare'] = (new Date(val['data_max_plecare']['seconds']*1000)).toLocaleDateString("en-US")
+        console.log(val)
         this.requests.push(val)
         this.idList.push(value.id)
       }
@@ -89,9 +126,6 @@ export class TranporterComponent implements OnInit {
     email: ['', Validators.required],
   });
 
-  ngOnInit(): void {
-  }
-  
   addtrack: boolean = false;
   addoffer: boolean = false;
   showreq: boolean = false;
@@ -206,8 +240,8 @@ export class TranporterComponent implements OnInit {
         numar_tel_client: cerere.numar_tel,
         email_transp: this.transporter.email,
         numar_tel_transp: this.currentOffer.numar_tel,
-        loc_plecare: cerere.loc_plecare,
-        loc_sosire: cerere.loc_sosire,
+        loc_plecare: cerere.loc_plecare['nume'],
+        loc_sosire: cerere.loc_sosire['nume'],
         tarif: 0,
         detalii_marfa: cerere.tip_marfa,
         detalii_camion: this.currentOffer.nr_inmatriculare,
