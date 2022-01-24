@@ -1,17 +1,28 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { Validators } from '@angular/forms';
-import { FormBuilder } from '@angular/forms';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Validators, FormBuilder, FormControl } from '@angular/forms';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { LocalStorageService } from '../services/local-storage.service';
 import { setDefaultOptions, loadModules } from 'esri-loader';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
-import localitati from '../../assets/localitati.json'
-import DatePicker from 'esri/widgets/support/DatePicker';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import {ContractInfo, ReqItem, Settlements, Truck, User} from "../transporter/transporter.component";
+import localitati from '../../assets/localitati.json';
 
-export interface Settlements {
-  id: number, nume: string,diacritice: string,judet: string,auto:string,zip: number,populatie: number,lat: number,lng: number
+interface OfferInfo {
+  id_camion: string,
+  id_transp:string,
+  nr_inmatriculare: string,
+  data_plecare: string,
+  loc_plecare: string,
+  data_sosire: string,
+  loc_sosire: string,
+  numar_tel: string,
+  email: string,
+  volum: number,
+  gabarit: number,
+  greutate: number,
+  pret_gol: number,
+  pret_incarcat: number
 }
 
 @Component({
@@ -21,10 +32,100 @@ export interface Settlements {
 })
 export class ClientComponent implements OnInit{
   myControl = new FormControl();
-  options: Settlements[] = localitati
-  filteredOptions1: Observable<Settlements[]> ;
-  filteredOptions2: Observable<Settlements[]> ;
+  options: Settlements[] = localitati;
+  filteredOptions1: Observable<Settlements[]>;
+  filteredOptions2: Observable<Settlements[]>;
   selectedValue: string;
+  offers: Array<OfferInfo> = [];
+  currentOffer: OfferInfo;
+
+  idList: Array<string> = [];
+  contracts: Array<ContractInfo> = [];
+  displayedColumnsOffers: string[] = [ 'data_plecare', 'loc_plecare', 'data_sosire', 'loc_sosire', 'gabarit', 'greutate', 'volum', 'pret_gol', 'pret_incarcat', 'numar_tel','email', 'rezerva_camion'];
+  displayedColumnsContracts: string[] = ['email_client', 'numar_tel_client', 'email_transp', 'numar_tel_transp', 'loc_plecare', 'loc_sosire', 'tarif', 'detalii_marfa', 'detalii_camion', 'instructiuni_speciale'];
+  map: __esri.Map;
+  @ViewChild("mapViewNode", { static: true })
+  private mapViewEl: ElementRef;
+  view: __esri.MapView;
+  timeoutHandler = null;
+  pointGraphic: __esri.Graphic;
+  graphicsLayer: __esri.GraphicsLayer;
+  routeCoordinates: Array<any> = [];
+  // displayedColumnsReq: string[] = [ 'id_transp' ,'data_plecare','loc_plecare','data_sosire','loc_sosire','tip_camion','volum','gabarit','greutate','pret','numar_tel'];
+  client : User;
+  currentReq: ReqItem;
+  offersAux: Array<OfferInfo> = [];
+  offerId: string;
+  products: Array<string> = [];
+  _Map;
+  _MapView;
+  _FeatureLayer;
+  _Graphic;
+  _GraphicsLayer;
+  _route;
+  _RouteParameters;
+  _FeatureSet;
+  _config;
+  addreq: boolean = false;
+  showtracks: boolean = false;
+  showmap: boolean = false;
+  showoffers: boolean = false;
+  showsugestions: boolean = false;
+  showcontracts: boolean = false;
+
+  addRequestForm = this.fb.group({
+    data_plecare: ['', Validators.required],
+    loc_plecare: ['', Validators.required],
+    data_max_plecare: ['', Validators.required],
+    data_sosire: ['', Validators.required],
+    loc_sosire: ['', Validators.required],
+    data_max_sosire: ['', Validators.required],
+    tip_marfa: ['', Validators.required],
+    masa: ['', Validators.required],
+    volum: ['', Validators.required],
+    buget: ['', Validators.required],
+    numar_tel: ['', Validators.required]
+  });
+
+  constructor(private fb: FormBuilder, private fs: AngularFirestore, private localStorage: LocalStorageService) {
+    this.fs.collection('offers').get().forEach(value =>
+      value.forEach(value => {
+          const val: OfferInfo = value.data() as OfferInfo;
+          this.fs.collection("tracks").doc(val.id_camion).get().forEach(value => {
+            let track = value.data() as Truck;
+            val.gabarit = track.gabarit;
+            val.greutate = track.greutate;
+            val.volum = track.volum;
+            val.pret_gol = track.pret_gol;
+            val.pret_incarcat = track.pret_incarcat;
+            const date = new Date(val['data_plecare']['seconds']*1000);
+            val['data_plecare'] = date.toLocaleDateString("en-US");
+            val['data_sosire'] = (new Date(val['data_sosire']['seconds']*1000)).toLocaleDateString("en-US");
+          })
+          this.offers.push(val);
+        }
+      )
+    );
+
+    this.fs.collection('contracts').get().forEach(value =>
+      value.forEach(value => {
+          const val: ContractInfo = value.data() as ContractInfo
+          if (val.id_transp == this.localStorage.getItem("UserID"))
+            this.contracts.push(val);
+        })
+    );
+
+    this.fs.collection('products').get().forEach(value =>
+      value.forEach(value => {
+          const val: string = value.data() as string;
+          this.products.push(val['name']);
+        })
+    );
+
+    this.fs.collection("users").doc(this.localStorage.getItem("UserID")).get().forEach(value => {
+      this.client = value.data() as User;
+    })
+  }
 
   ngOnInit() {
     this.filteredOptions1 = this.addRequestForm.controls['loc_plecare'].valueChanges.pipe(
@@ -32,6 +133,7 @@ export class ClientComponent implements OnInit{
       map(value => (typeof value === 'string' ? value : value.nume)),
       map(name => (name ? this._filter(name) : this.options.slice())),
     );
+
     this.filteredOptions2 = this.addRequestForm.controls['loc_sosire'].valueChanges.pipe(
       startWith(''),
       map(value => (typeof value === 'string' ? value : value.nume)),
@@ -48,109 +150,13 @@ export class ClientComponent implements OnInit{
 
     return this.options.filter(option => option.nume.toLowerCase().includes(filterValue));
   }
-  offers: Array<OfferInfo> = []
-  currentOffer: OfferInfo
-
-  idList: Array<string> = []
-  contracts: Array<ContractInfo> = []
-  displayedColumnsOffers: string[] = [ 'data_plecare', 'loc_plecare', 'data_sosire', 'loc_sosire', 'gabarit', 'greutate', 'volum', 'pret_gol', 'pret_incarcat', 'numar_tel','email', 'rezerva_camion'];
-  displayedColumnsContracts: string[] = ['email_client', 'numar_tel_client', 'email_transp', 'numar_tel_transp', 'loc_plecare', 'loc_sosire', 'tarif', 'detalii_marfa', 'detalii_camion', 'instructiuni_speciale'];
-  map: __esri.Map;
-  @ViewChild("mapViewNode", { static: true }) private mapViewEl: ElementRef;
-  view: __esri.MapView;
-  timeoutHandler = null;
-  pointGraphic: __esri.Graphic;
-  graphicsLayer: __esri.GraphicsLayer;
-  routeCoordinates: Array<any> = []
-  // displayedColumnsReq: string[] = [ 'id_transp' ,'data_plecare','loc_plecare','data_sosire','loc_sosire','tip_camion','volum','gabarit','greutate','pret','numar_tel'];
-  client : User1
-  currentReq: ReqItem
-  offersAux: Array<OfferInfo> = []
-  offerId: string
-  products: Array<string> = []
-  _Map;
-  _MapView;
-  _FeatureLayer;
-  _Graphic;
-  _GraphicsLayer;
-  _route;
-  _RouteParameters;
-  _FeatureSet;
-  _config;
-  constructor(
-    private fb: FormBuilder,
-    private fs: AngularFirestore,
-    private localStorage: LocalStorageService
-  ) {
-    this.fs.collection('offers').get().forEach(value =>
-      value.forEach(value => {
-          const val: OfferInfo = value.data() as OfferInfo
-          this.fs.collection("tracks").doc(val.id_camion).get().forEach(value => {
-            let track = value.data() as Track
-            val.gabarit = track.gabarit
-            val.greutate = track.greutate
-            val.volum = track.volum
-            val.pret_gol = track.pret_gol
-            val.pret_incarcat = track.pret_incarcat
-            const date = new Date(val['data_plecare']['seconds']*1000);
-            val['data_plecare'] = date.toLocaleDateString("en-US")
-            val['data_sosire'] = (new Date(val['data_sosire']['seconds']*1000)).toLocaleDateString("en-US")
-          })
-          this.offers.push(val)
-        }
-      )
-    );
-
-    this.fs.collection('contracts').get().forEach(value =>
-      value.forEach(value => {
-          const val: ContractInfo = value.data() as ContractInfo
-          if (val.id_transp == this.localStorage.getItem("UserID"))
-            this.contracts.push(val)
-        }
-      )
-    );
-    this.fs.collection('products').get().forEach(value =>
-      value.forEach(value => {
-          const val: string = value.data() as string
-
-          this.products.push(val['name'])
-        }
-      )
-    );
-
-    this.fs.collection("users").doc(this.localStorage.getItem("UserID")).get().forEach(value => {
-      this.client = value.data() as User1
-    })
-  }
-
-
-  addreq: boolean = false;
-  showtracks: boolean = false;
-  showmap: boolean = false
-  showoffers: boolean = false
-  showsugestions: boolean = false
-  showcontracts: boolean = false
-
-  addRequestForm = this.fb.group({
-    data_plecare: ['', Validators.required],
-    loc_plecare: ['', Validators.required],
-    data_max_plecare: ['', Validators.required],
-    data_sosire: ['', Validators.required],
-    loc_sosire: ['', Validators.required],
-    data_max_sosire: ['', Validators.required],
-    tip_marfa: ['', Validators.required],
-    masa: ['', Validators.required],
-    volum: ['', Validators.required],
-    buget: ['', Validators.required],
-    numar_tel: ['', Validators.required]
-  });
 
   addRequest() {
     this.addreq = true;
-    this.showtracks = false
-    this.showoffers = false
-    this.showsugestions = false
-    this.showcontracts = false
+    this.showtracks = false;
+    this.showoffers = false;
+    this.showsugestions = false;
+    this.showcontracts = false;
   }
 
   TakeTrack(i: number) {
@@ -158,25 +164,26 @@ export class ClientComponent implements OnInit{
     // this.tracks.splice(i, 1)
     // this.idList.splice(i, 1)
   }
+
   ShowOffers() {
-    this.showoffers = true
-    this.addreq = false
-    this.showtracks = false
-    this.showsugestions = false
-    this.offersAux = []
-    this.showcontracts = false
+    this.showoffers = true;
+    this.addreq = false;
+    this.showtracks = false;
+    this.showsugestions = false;
+    this.offersAux = [];
+    this.showcontracts = false;
   }
 
   showContracts() {
-    this.showcontracts = true
-    this.showoffers = false
-    this.addreq = false
-    this.showtracks = false
-    this.showsugestions = false
+    this.showcontracts = true;
+    this.showoffers = false;
+    this.addreq = false;
+    this.showtracks = false;
+    this.showsugestions = false;
   }
 
   SubmitRequest() {
-    let id = this.fs.createId()
+    let id = this.fs.createId();
     let item: ReqItem = {
       id_cerere: id,
       id_client: this.localStorage.getItem("UserID"),
@@ -193,16 +200,16 @@ export class ClientComponent implements OnInit{
       numar_tel: this.addRequestForm.value.numar_tel
     };
 
-    this.fs.collection('requests').doc(id).set(item)
-    this.addRequestForm.reset()
+    this.fs.collection('requests').doc(id).set(item);
+    this.addRequestForm.reset();
     this.addreq = false;
   }
 
   GiveProducts(oferta: OfferInfo) {
-    console.log(this.currentReq)
-    this.currentOffer = oferta
+    console.log(this.currentReq);
+    this.currentOffer = oferta;
     this.fs.collection('users').doc(oferta.id_transp).get().forEach(value => {
-      let transportator = value.data() as User1
+      let transportator = value.data() as User;
       let item: ContractInfo = {
         id_client: this.localStorage.getItem("UserID"),
         id_transp: oferta.id_transp ,
@@ -216,22 +223,22 @@ export class ClientComponent implements OnInit{
         detalii_marfa: '',
         detalii_camion: oferta.nr_inmatriculare,
         instructiuni_speciale: ''
-      }
-      this.fs.collection('contracts').add(item)
+      };
+      this.fs.collection('contracts').add(item);
       let obj = this.fs.collection('offers').ref.where("nr_inmatriculare", "==", oferta.nr_inmatriculare).get().then(obj=> {
-        obj.forEach(doc => this.offerId = doc.id)
+        obj.forEach(doc => this.offerId = doc.id);
       })
-      this.fs.collection('offers').doc(this.offerId).delete()
+      this.fs.collection('offers').doc(this.offerId).delete();
       this.offers.forEach((element,index)=>{
         if(element.nr_inmatriculare==oferta.nr_inmatriculare) this.offers.splice(index,1);
       });
-
     })
   }
+
   MatchingOffers() {
-    this.addreq = false
-    this.showsugestions = true
-    let id = this.fs.createId()
+    this.addreq = false;
+    this.showsugestions = true;
+    let id = this.fs.createId();
     let item: ReqItem = {
       id_cerere: id,
       id_client: this.localStorage.getItem("UserID"),
@@ -247,22 +254,23 @@ export class ClientComponent implements OnInit{
       buget: this.addRequestForm.value.buget,
       numar_tel: this.addRequestForm.value.numar_tel
     };
-    this.currentReq = item
+    this.currentReq = item;
     this.offers.forEach(val => {
       if (item.loc_plecare['nume'] == val.loc_plecare['nume'] && item.loc_sosire['nume'] == val.loc_sosire['nume']) {
-        this.offersAux.push(val)
+        this.offersAux.push(val);
       }
     })
-    this.addRequestForm.reset()
+    this.addRequestForm.reset();
   }
 
   ShowTracks() {
     this.showtracks = true;
-    this.addreq = false
+    this.addreq = false;
   }
+
   async initializeMap() {
     try {
-      this.showmap = true
+      this.showmap = true;
 
       // before loading the modules for the first time,
       // also lazy load the CSS for the version of
@@ -466,68 +474,5 @@ export class ClientComponent implements OnInit{
 
     console.log("feature layers added");
   }
-
-
 }
 
-export interface User1{
-  email: string,
-  username: string,
-  type: string
-}
-export interface Track {
-  id_transp: string,
-  nr_inmatriculare: string,
-  tip_camion: string,
-  volum: number,
-  gabarit: number,
-  greutate: number,
-  pret_gol: number,
-  pret_incarcat: number
-}
-export interface OfferInfo {
-  id_camion: string,
-  id_transp:string,
-  nr_inmatriculare: string,
-  data_plecare: string,
-  loc_plecare: string,
-  data_sosire: string,
-  loc_sosire: string,
-  numar_tel: string,
-  email: string,
-  volum: number,
-  gabarit: number,
-  greutate: number,
-  pret_gol: number,
-  pret_incarcat: number
-}
-export interface ReqItem {
-  id_cerere: string,
-  id_client: string,
-  data_plecare: Date,
-  loc_plecare: string,
-  data_max_plecare: Date,
-  data_sosire: Date,
-  loc_sosire: string,
-  data_max_sosire: Date,
-  tip_marfa: string,
-  masa: number,
-  volum: number,
-  buget: number,
-  numar_tel: string
-}
-
-export interface ContractInfo {
-  id_client: string,
-  id_transp: string,
-  email_client: string,
-  numar_tel_client: string,
-  email_transp: string,
-  numar_tel_transp: string,
-  loc_plecare: string,
-  loc_sosire: string,
-  tarif: number,
-  detalii_marfa: string,
-  detalii_camion: string,
-  instructiuni_speciale: string
-}

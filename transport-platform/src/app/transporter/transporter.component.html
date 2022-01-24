@@ -19,22 +19,6 @@
 
   <div style = "width:1000px; display: flex; flex-direction: column; justify-content: center;">
     <div *ngIf="showreq">
-      <!-- <table mat-table [dataSource]="requests" class="mat-elevation-z8 demo-table">
-          <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnDef">
-            <th mat-header-cell *matHeaderCellDef>
-              {{column.header}}
-            </th>
-            <td mat-cell *matCellDef="let row">
-              {{column.cell(row)}}
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="actiune">
-              <th mat-header-cell *matHeaderCellDef> Cereri </th>
-              <td mat-cell *matCellDef="let element"> <button mat-button >Preia marfa</button> </td>
-            </ng-container>
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table> -->
       <table mat-table [dataSource]="requests" class="mat-elevation-z8">
         <ng-container matColumnDef="data_plecare">
           <th mat-header-cell *matHeaderCellDef> Data plecare </th>
@@ -143,7 +127,7 @@
       </table>
     </div>
     <div *ngIf="showtracks">
-      <table mat-table [dataSource]="tracks" class="mat-elevation-z8">
+      <table mat-table [dataSource]="trucks" class="mat-elevation-z8">
         <ng-container matColumnDef="nr_inmatriculare">
           <th mat-header-cell *matHeaderCellDef> Numar inmatriculare </th>
           <td mat-cell *matCellDef="let element"> {{element.nr_inmatriculare}} </td>
@@ -360,10 +344,6 @@
           <button mat-raised-button (click)="MatchingRequests()" >Vezi oferte disponibile</button>
         </div>
       </div>
-
     </form>
   </div>
-
-
 </div>
-

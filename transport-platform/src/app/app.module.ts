@@ -7,13 +7,12 @@ import { AngularFireModule } from "@angular/fire";
 import { AngularFireAuthModule } from "@angular/fire/auth";
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
-import { FormsModule } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProfileComponent } from './profile/profile.component';
 import { StartComponent } from './start/start.component';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { TranporterComponent } from './tranporter/tranporter.component';
+import { TransporterComponent } from './transporter/transporter.component';
 import { ClientComponent } from './client/client.component';
 import { AdminComponent } from './admin/admin.component';
 import {MatTableModule} from '@angular/material/table';
@@ -31,7 +30,7 @@ import {MatButtonModule} from '@angular/material/button';
     AppComponent,
     ProfileComponent,
     StartComponent,
-    TranporterComponent,
+    TransporterComponent,
     ClientComponent,
     AdminComponent
   ],

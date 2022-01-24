@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TranporterComponent } from './tranporter.component';
+import { TransporterComponent } from './transporter.component';
 
-describe('TranporterComponent', () => {
-  let component: TranporterComponent;
-  let fixture: ComponentFixture<TranporterComponent>;
+describe('TransporterComponent', () => {
+  let component: TransporterComponent;
+  let fixture: ComponentFixture<TransporterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TranporterComponent ]
+      declarations: [ TransporterComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TranporterComponent);
+    fixture = TestBed.createComponent(TransporterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
