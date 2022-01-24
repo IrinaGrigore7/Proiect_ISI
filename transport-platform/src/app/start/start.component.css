@@ -1,63 +1,64 @@
+
 .Page1 {
-    background-color: #06C3BD;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+  background-color: #06C3BD;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .logo {
-    position: absolute;
-    left: 10%;
-    top: 45%;
+  position: absolute;
+  left: 10%;
+  top: 45%;
 }
 
 .title {
-    position: absolute;
-    left: 12%;
-    top: 30%
+  position: absolute;
+  left: 12%;
+  top: 30%
 }
 
 .LoginButton {
-    height: 40px;
-    width: 100px;
-    font-size: large;
-    margin: 10px 0;
+  height: 40px;
+  width: 100px;
+  font-size: large;
+  margin: 10px 0;
 }
 
 .SignUp {
-    height: 40px;
-    width: 100px;
-    font-size: large;
+  height: 40px;
+  width: 100px;
+  font-size: large;
 }
 
 * {
-    box-sizing: border-box;
-  }
-  
-  input[type=text], select, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    resize: vertical;
-  }
+  box-sizing: border-box;
+}
 
-  input[type=password], select, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    resize: vertical;
-  }
-  
-  
-  label {
-    padding: 12px 12px 12px 0;
-    display: inline-block;
-  }
-  
+input[type=text], select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+input[type=password], select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+
+label {
+  padding: 12px 12px 12px 0;
+  display: inline-block;
+}
+
 input[type=submit] {
   background-color: #4CAF50;
   color: white;
@@ -69,7 +70,7 @@ input[type=submit] {
   margin-left: 27%;
   margin-top: 5%;
 }
-  
+
 input[type=submit]:hover {
   background-color: #45a049;
 }
