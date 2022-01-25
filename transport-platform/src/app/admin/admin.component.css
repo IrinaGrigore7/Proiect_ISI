@@ -1,20 +1,38 @@
 .container {
-    background-color: #06C3BD;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+  background-color: aliceblue;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 input[type=button] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    float: left;
-    margin-left: 27%;
-    margin-top: 5%;
-  }
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  float: left;
+  margin-left: 27%;
+  margin-top: 5%;
+}
+table {
+  width: 100%;
+}
+
+.example-full-width {
+  min-width: 150px;
+  max-width: 500px;
+  width: 30%;
+  background-color: aliceblue;
+}
+.column1{
+  min-width: 900px;
+  max-width: 300px;
+  width: 30%;
+  background-color: aliceblue;
+  padding: 10px 20px;
+  border: none;
+}

@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import {ContractInfo, ReqItem, Settlements, Truck, User} from "../transporter/transporter.component";
 import localitati from '../../assets/localitati.json';
+import PopupTemplate from '@arcgis/core/PopupTemplate';
 
 interface OfferInfo {
   id_camion: string,
@@ -268,6 +269,24 @@ export class ClientComponent implements OnInit{
     this.addreq = false;
   }
 
+  getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+    var dLon = this.deg2rad(lon2-lon1);
+    var a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+    ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c; // Distance in km
+    return d;
+  }
+
+  deg2rad(deg) {
+    return deg * (Math.PI/180)
+  }
+
   async initializeMap() {
     try {
       this.showmap = true;
@@ -278,7 +297,7 @@ export class ClientComponent implements OnInit{
       setDefaultOptions({ css: true });
 
       // Load the modules for the ArcGIS API for JavaScript
-      const [Map, MapView, FeatureLayer, Graphic, GraphicsLayer, route, RouteParameters, FeatureSet, esriConfig, PictureMarkerSymbol] = await loadModules([
+      const [Map, MapView, FeatureLayer, Graphic, GraphicsLayer, route, RouteParameters, FeatureSet, esriConfig, PopupTemplate] = await loadModules([
         "esri/Map",
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
@@ -288,7 +307,8 @@ export class ClientComponent implements OnInit{
         "esri/rest/support/RouteParameters",
         "esri/rest/support/FeatureSet",
         "esri/config",
-        "esri/symbols/PictureMarkerSymbol"
+        "esri/symbols/PictureMarkerSymbol",
+        "esri/PopupTemplate",
       ]);
 
       this._Map = Map;
@@ -306,63 +326,32 @@ export class ClientComponent implements OnInit{
       const mapProperties = {
         basemap: "arcgis-navigation"
       };
+      const truckFree = {
+        type: "picture-marker",
+        color: [15, 222, 10],  // Green
+      }
+      const truckBusy = {
+        type: "simple-marker",
+        color: [222, 15, 10],  // Red
+      }
+      const pictureMarkerSymbolPlecare = {
+        type: "simple-marker",
+        color: [34, 139, 34],  // ForestGreen
+        outline: {
+          color: [255, 255, 255], // White
+          width: 1
+        }
+      };
+      const pictureMarkerSymbolSosire = {
+        type: "simple-marker",
+        color: [0, 0, 0],  // Black
+        outline: {
+          color: [255, 255, 255], // White
+          width: 1
+        }
+      };
 
       this.map = new Map(mapProperties);
-
-      this.addFeatureLayers();
-
-      const graphicsLayer = new GraphicsLayer();
-
-      const pointCenterBucharest = { //Create a point
-        type: "point",
-        longitude: this.currentReq.loc_plecare['lng'],
-        latitude: this.currentReq.loc_plecare['lat'],
-      };
-
-      const pointCenterClujNapoca = {
-        type: "point",
-        longitude:this.currentReq.loc_sosire['lng'],
-        latitude: this.currentReq.loc_sosire['lat'],
-      }
-
-
-      const truckPictureMarkerSymbol = {
-        type: "picture-marker",
-        url: "../../assets/pickup.png",
-        width: "28px",
-        height: "28px"
-      }
-      const pictureMarkerSymbolBucharest = {
-        type: "picture-marker",
-        url: "../../assets/start_icon.png",
-        width: "28px",
-        height: "28px"
-      };
-      const pictureMarkerSymbolClujNapoca= {
-        type: "picture-marker",
-        url: "../../assets/finish_point.png",
-        width: "28px",
-        height: "28px"
-      };
-
-      const truck = new Graphic({
-        geometry: pointCenterBucharest,
-        symbol: truckPictureMarkerSymbol
-      })
-      const pointGraphicBucharest = new Graphic({
-        geometry: pointCenterBucharest,
-        symbol: pictureMarkerSymbolBucharest
-      });
-      const pointGraphicClujNapoca = new Graphic({
-        geometry: pointCenterClujNapoca,
-        symbol: pictureMarkerSymbolClujNapoca
-      });
-
-      graphicsLayer.add(pointGraphicBucharest);
-      graphicsLayer.add(pointGraphicClujNapoca);
-      graphicsLayer.add(truck);
-
-      this.map.add(graphicsLayer);
 
       // Initialize the MapView
       const mapViewProperties = {
@@ -376,57 +365,113 @@ export class ClientComponent implements OnInit{
 
       const routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
 
-      const routeParams = new RouteParameters({
-        stops: new FeatureSet({
-          features: [pointGraphicBucharest, pointGraphicClujNapoca]
-        }),
+      this.addFeatureLayers();
 
-        returnDirections: true
+      this.fs.collection("contracts").get().forEach(obj => {
+        obj.forEach(doc => {
+          this.fs.collection("contracts").doc(doc.id).get().forEach(value => {
+            let contractInfo = value.data() as ContractInfo;
+            let graphicsLayer = new GraphicsLayer();
+            let truckInfo;
 
+            this.fs.collection('tracks').ref.where("nr_inmatriculare", "==", contractInfo.detalii_camion).get().then(obj=> {
+              obj.forEach(doc => {
+                truckInfo = doc.data() as Truck;
+                const truckId = doc.id;
+                this.fs.collection('offers').ref.where("id_camion", "==", truckId).get().then(obj => {
+                  obj.forEach( doc => {
+
+                    const offerInfo = doc.data() as OfferInfo;
+                    const distance = this.getDistanceFromLatLonInKm(contractInfo.loc_plecare['lat'], contractInfo.loc_plecare['lng'], contractInfo.loc_sosire['lat'], contractInfo.loc_sosire['lng']);
+
+                    const popupTemplate = {
+                      title: `Truck ${truckId}`,
+                      content: "<ul><li>" + "Nr. inmatriculare: " + "<b>" + `${contractInfo.detalii_camion}` + "</b></li>" +
+                        "<li>" + "De la: " + "<b>" + `${contractInfo.loc_plecare['nume']}, ${contractInfo.loc_plecare['judet']}` + "</b>" + " la: " + "<b>" + ` ${contractInfo.loc_sosire['nume']}, ${contractInfo.loc_sosire['judet']}` + "</b>" + "</li>" +
+                        "<li>" + "Data plecare: " + "<b>" + `${offerInfo.data_plecare}` + "</b>" + "</li>" +
+                        "<li>" + "Data sosire: " + "<b>" + `${offerInfo.data_sosire}` + "</b>" + "</li>" +
+                        "<li>" + "Distanta: " + "<b>" + `${distance.toFixed(1)}` + " km" + "</b>" + "</li>" +
+                        "<li>" + "Pret: " + "<b>" + `${(parseFloat(distance.toFixed(1)) * (truckInfo.pret_gol + truckInfo.pret_incarcat)).toFixed(2)}` + " $" + "</b>" + "</li></ul>"
+                    }
+
+                    let pointPlecare = {
+                      type: "point",
+                      longitude: contractInfo.loc_plecare['lng'],
+                      latitude: contractInfo.loc_plecare['lat']
+                    };
+
+                    let pointSosire = {
+                      type: "point",
+                      longitude: contractInfo.loc_sosire['lng'],
+                      latitude: contractInfo.loc_sosire['lat']
+                    };
+
+                    let truckGraphicBusy = new Graphic({
+                      geometry: pointPlecare,
+                      symbol: truckBusy
+                    })
+                    let truckGraphicFree = new Graphic({
+                      geometry: pointPlecare,
+                      symbol: truckFree
+                    })
+                    let pointGraphicPlecare = new Graphic({
+                      geometry: pointPlecare,
+                      symbol: pictureMarkerSymbolPlecare
+                    });
+                    let pointGraphicSosire = new Graphic({
+                      geometry: pointSosire,
+                      symbol: pictureMarkerSymbolSosire
+                    });
+
+                    truckGraphicBusy.popupTemplate = popupTemplate;
+
+                    graphicsLayer.add(pointGraphicPlecare);
+                    graphicsLayer.add(pointGraphicSosire);
+                    graphicsLayer.add(truckGraphicBusy);
+
+                    this.map.add(graphicsLayer);
+
+                    const routeParams = new RouteParameters({
+                      stops: new FeatureSet({
+                        features: [pointGraphicPlecare, pointGraphicSosire]
+                      }),
+                      returnDirections: false
+                    });
+
+                    route.solve(routeUrl, routeParams)
+                      .then(async (data) => {
+                        for (const result of data.routeResults) {
+                          result.route.symbol = {
+                            type: "simple-line",
+                            color: [Math.floor(Math.random() * 256), Math.floor(Math.random() * 256), Math.floor(Math.random() * 256)],
+                            width: 3
+                          };
+
+                          this.view.graphics.add(result.route);
+
+                          for await (let entry of result.route.geometry.paths[0]) {
+                            truckGraphicBusy.geometry.longitude = entry[0];
+                            truckGraphicBusy.geometry.latitude = entry[1];
+                            graphicsLayer.add(truckGraphicBusy);
+
+                            this.map.add(graphicsLayer);
+                            await new Promise(r => setTimeout(r, 10));
+                          }
+                        }
+
+                      }).catch(function(error){
+                      console.log(error);
+                    });
+                  })
+                })
+              });
+            })
+          })
+        })
       });
 
-      route.solve(routeUrl, routeParams)
-        .then(async (data) => {
-          for (const result of data.routeResults) {
-            result.route.symbol = {
-              type: "simple-line",
-              color: [5, 150, 255],
-              width: 3
-            };
-            this.view.graphics.add(result.route);
-            for await (let entry of result.route.geometry.paths[0]) {
-              truck.geometry.longitude = entry[0];
-              truck.geometry.latitude = entry[1];
-              graphicsLayer.add(truck);
 
-              this.map.add(graphicsLayer);
-              await new Promise(r => setTimeout(r, 100));
-            }
-          }
 
-          // Display directions
-          if (data.routeResults.length > 0) {
-            const directions = document.createElement("ol");
-            // @ts-ignore
-            directions.classList = "esri-widget esri-widget--panel esri-directions__scroller";
-            directions.style.marginTop = "0";
-            directions.style.padding = "15px 15px 15px 30px";
-            const features = data.routeResults[0].directions.features;
-
-            // Show each direction
-            features.forEach(function (result, i) {
-              const direction = document.createElement("li");
-              direction.innerHTML = result.attributes.text + " (" + result.attributes.length.toFixed(2) + " miles)";
-              directions.appendChild(direction);
-            });
-
-            this.view.ui.empty("top-right");
-            this.view.ui.add(directions, "top-right");
-          }
-
-        }).catch(function(error){
-        console.log(error);
-      });
 
 
       // Fires `pointer-move` event when user clicks on "Shift"

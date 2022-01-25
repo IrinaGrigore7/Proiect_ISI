@@ -1,42 +1,101 @@
 <div class="container" style = "display: flex;">
-    <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
-        <div>
-            <input (click)="ShowUsers()" type="button" value="Utilizatori">
-        </div>
-        <div>
-            <input type="button" value="Contracte">
-        </div>
-        <div>
-            <input (click)="ShowProducts()" type="button" value="Marfa">
-        </div>
+  <div class="bla" style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
+    <div>
+      <input (click)="ShowUsers()" type="button" value="Utilizatori">
     </div>
-    <div style = "display: flex; flex-direction: column;  justify-content: center; width: 30%;">
-        <div class="list-group" *ngIf="showusers" >
-            <div class="users" *ngFor="let user of users">
-                <p>Username: {{user.username}} </p>
-                <p>Email: {{user.email}}</p>   
-                <p>Tip utilizator: {{user.type}}</p> 
-                <br>  
-            </div>
-          </div>
-        <form [formGroup]="addProductForm" *ngIf="showproducts">
-            <p>
-                Produse:
-            </p>
-            <div class="products" *ngFor="let product of products">
-                <p>{{product.name}}</p> 
-            </div>
-            <div class="row">
-                <div class="col-25">
-                <label for="fname">Adauga produs</label>
-                </div>
-                <div >
-                <input type="text" id="fname" name="name" placeholder="Produs.."  formControlName="name">
-                </div>
-            </div>
-            <div class="row">
-              <input type="submit" value="Adauga" (click)="AddProducts()">
-            </div>
-        </form>
+    <div>
+      <input (click)="ShowContracts()" type="button" value="Contracte">
+    </div>
+    <div>
+      <input (click)="ShowProducts()" type="button" value="Marfa">
+    </div>
+  </div>
+  <div style = "display: flex; flex-direction: column;  justify-content: center; width: 60%;">
+    <div class="list-group" *ngIf="showusers" >
+      <table mat-table [dataSource]="users" class="mat-elevation-z8">
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef> Username </th>
+          <td mat-cell *matCellDef="let element"> {{element.username}} </td>
+        </ng-container>
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef> Email </th>
+          <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+        </ng-container>
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef> Tip utilizator </th>
+          <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsOffers"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsOffers;"></tr>
+      </table>
+    </div>
+    <form [formGroup]="addProductForm" *ngIf="showproducts">
+      <table mat-table [dataSource]="products" class="mat-elevation-z8">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Produse </th>
+          <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayProducts"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayProducts;"></tr>
+      </table>
+      <div style="display: flex; flex-direction: row;">
+        <div style="display: flex; flex-direction: row;">
+          <mat-form-field class="column1" appearance="fill">
+            <mat-label>Produs</mat-label>
+            <input type="text" matInput formControlName="name">
+          </mat-form-field>
         </div>
+      </div>
+      <div style="padding:20px 400px; border: none;">
+        <button mat-raised-button (click)="AddProducts()" >Adauga</button>
+      </div>
+    </form>
+
+    <div *ngIf="showcontracts">
+      <table mat-table [dataSource]="contracts" class="mat-elevation-z8">
+        <ng-container matColumnDef="email_client">
+          <th mat-header-cell *matHeaderCellDef> Email client </th>
+          <td mat-cell *matCellDef="let element"> {{element.email_client}} </td>
+        </ng-container>
+        <ng-container matColumnDef="numar_tel_client">
+          <th mat-header-cell *matHeaderCellDef> Numar tel client </th>
+          <td mat-cell *matCellDef="let element"> {{element.numar_tel_client}} </td>
+        </ng-container>
+        <ng-container matColumnDef="email_transp">
+          <th mat-header-cell *matHeaderCellDef> Email transportator </th>
+          <td mat-cell *matCellDef="let element"> {{element.email_transp}} </td>
+        </ng-container>
+        <ng-container matColumnDef="numar_tel_transp">
+          <th mat-header-cell *matHeaderCellDef> Numar tel transp </th>
+          <td mat-cell *matCellDef="let element"> {{element.numar_tel_transp}} </td>
+        </ng-container>
+        <ng-container matColumnDef="loc_plecare">
+          <th mat-header-cell *matHeaderCellDef> Loc plecare </th>
+          <td mat-cell *matCellDef="let element"> {{element.loc_plecare['nume']}} </td>
+        </ng-container>
+        <ng-container matColumnDef="loc_sosire">
+          <th mat-header-cell *matHeaderCellDef> Loc sosire </th>
+          <td mat-cell *matCellDef="let element"> {{element.loc_sosire['nume']}} </td>
+        </ng-container>
+        <ng-container matColumnDef="tarif">
+          <th mat-header-cell *matHeaderCellDef> Tarif </th>
+          <td mat-cell *matCellDef="let element"> {{element.tarif}} </td>
+        </ng-container>
+        <ng-container matColumnDef="detalii_marfa">
+          <th mat-header-cell *matHeaderCellDef> Detalii marfa </th>
+          <td mat-cell *matCellDef="let element"> {{element.detalii_marfa}} </td>
+        </ng-container>
+        <ng-container matColumnDef="detalii_camion">
+          <th mat-header-cell *matHeaderCellDef> Detalii camion </th>
+          <td mat-cell *matCellDef="let element"> {{element.detalii_camion}} </td>
+        </ng-container>
+        <ng-container matColumnDef="instructiuni_speciale">
+          <th mat-header-cell *matHeaderCellDef> Instructiuni speciale </th>
+          <td mat-cell *matCellDef="let element"> {{element.instructiuni_speciale}} </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsContracts"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsContracts;"></tr>
+      </table>
+    </div>
+  </div>
 </div>
